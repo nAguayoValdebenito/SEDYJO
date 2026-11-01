@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Comercial Sedyjo | Página en construcción</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: max(24px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+      background-color: #FFFFFF;
+      font-family: system-ui, sans-serif;
+      text-align: center;
+    }
+
+    .logo {
+      width: 180px;
+      height: 180px;
+      max-width: 100%;
+      flex-shrink: 0;
+      border-radius: 50%;
+      object-fit: cover;
+      display: block;
+    }
+
+    h1 {
+      margin: 28px 0 12px;
+      color: #2E7D5B;
+      font-weight: 700;
+      font-size: clamp(1.5rem, 5vw, 2.5rem);
+      line-height: 1.2;
+      overflow-wrap: break-word;
+      text-wrap: balance;
+    }
+
+    p {
+      margin: 0;
+      max-width: 36rem;
+      color: #6B7280;
+      font-size: clamp(1rem, 2.5vw, 1.2rem);
+      line-height: 1.5;
+    }
+
+    /* Gatito constructor de fondo */
+    :root {
+      --gato: clamp(220px, min(42vw, 55vh), 500px);
+    }
+
+    body {
+      padding-bottom: calc(var(--gato) * 0.82 + 16px);
+    }
+
+    .logo,
+    h1,
+    p {
+      position: relative;
+      z-index: 1;
+    }
+
+    .fondo {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: var(--gato);
+      height: auto;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .martillo {
+      transform-origin: 195px 172px;
+      animation: martillar 1.2s ease-in-out infinite;
+    }
+
+    .chispa {
+      transform-origin: 128px 178px;
+      opacity: 0;
+      animation: chispa 1.2s ease-out infinite;
+    }
+
+    .tabla {
+      animation: rebote 1.2s ease-in-out infinite;
+    }
+
+    .cola {
+      transform-origin: 246px 205px;
+      animation: cola 1.6s ease-in-out infinite alternate;
+    }
+
+    .cuerpo {
+      animation: respirar 0.6s ease-in-out infinite alternate;
+    }
+
+    .ojos {
+      transform-origin: 188px 135px;
+      animation: parpadeo 4s infinite;
+    }
+
+    @keyframes martillar {
+      0%, 40% { transform: rotate(50deg); animation-timing-function: ease-in; }
+      52%, 60% { transform: rotate(0deg); animation-timing-function: ease-out; }
+      100% { transform: rotate(50deg); }
+    }
+
+    @keyframes chispa {
+      0%, 51% { opacity: 0; transform: scale(0.3); }
+      54% { opacity: 1; transform: scale(1); }
+      72%, 100% { opacity: 0; transform: scale(1.6); }
+    }
+
+    @keyframes rebote {
+      0%, 51% { transform: translateY(0); }
+      55% { transform: translateY(1.5px); }
+      65%, 100% { transform: translateY(0); }
+    }
+
+    @keyframes cola {
+      from { transform: rotate(-10deg); }
+      to { transform: rotate(14deg); }
+    }
+
+    @keyframes respirar {
+      from { transform: translateY(0); }
+      to { transform: translateY(-2px); }
+    }
+
+    @keyframes parpadeo {
+      0%, 92%, 100% { transform: scaleY(1); }
+      96% { transform: scaleY(0.1); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .martillo, .chispa, .tabla, .cola, .cuerpo, .ojos {
+        animation: none;
+      }
+
+      .martillo {
+        transform: rotate(25deg);
+      }
+    }
+
+    @media (max-width: 479px) {
+      .logo {
+        width: 140px;
+        height: 140px;
+      }
+    }
+
+    /* Celulares en horizontal u otras pantallas muy bajas */
+    @media (max-height: 480px) {
+      :root {
+        --gato: 110px;
+      }
+
+      .logo {
+        width: 110px;
+        height: 110px;
+      }
+
+      h1 {
+        margin: 16px 0 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <svg class="fondo" viewBox="0 0 280 230" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="140" cy="222" rx="136" ry="5" fill="#E5E7EB"/>
+
+    <!-- ladrillos -->
+    <g stroke="#B45F3C" stroke-width="1.5">
+      <rect x="10" y="204" width="34" height="16" rx="2" fill="#D9774F"/>
+      <rect x="46" y="204" width="34" height="16" rx="2" fill="#D9774F"/>
+      <rect x="28" y="187" width="34" height="16" rx="2" fill="#D9774F"/>
+    </g>
+
+    <!-- tabla que se está clavando -->
+    <g class="tabla">
+      <rect x="92" y="192" width="10" height="28" fill="#B98552"/>
+      <rect x="148" y="192" width="10" height="28" fill="#B98552"/>
+      <rect x="84" y="180" width="82" height="12" rx="2" fill="#D4A06A"/>
+      <path d="M92 186h66" stroke="#B98552" stroke-width="1.5" stroke-linecap="round"/>
+      <rect x="126" y="172" width="4" height="9" rx="1" fill="#8A8F98"/>
+    </g>
+
+    <!-- chispas del golpe -->
+    <g class="chispa" stroke="#FFC933" stroke-width="3" stroke-linecap="round">
+      <path d="M128 176l-12-8M128 176l0-14M128 176l12-8"/>
+    </g>
+
+    <!-- gatito -->
+    <g class="cuerpo">
+      <path class="cola" d="M246 205c26-4 34-30 22-44" fill="none" stroke="#F2A65A" stroke-width="10" stroke-linecap="round"/>
+      <ellipse cx="215" cy="192" rx="38" ry="30" fill="#F2A65A"/>
+      <ellipse cx="205" cy="200" rx="20" ry="18" fill="#FCE3C0"/>
+      <ellipse cx="190" cy="218" rx="13" ry="6" fill="#F2A65A"/>
+      <ellipse cx="232" cy="218" rx="13" ry="6" fill="#F2A65A"/>
+
+      <!-- orejas y cabeza -->
+      <path d="M160 126l-2-26 18 12z" fill="#F2A65A"/>
+      <path d="M204 112l18-12-2 28z" fill="#F2A65A"/>
+      <circle cx="190" cy="138" r="28" fill="#F2A65A"/>
+      <path d="M173 118l8 6M189 114v8M205 118l-8 6" stroke="#D98B3E" stroke-width="3" stroke-linecap="round"/>
+
+      <!-- casco -->
+      <path d="M163 124c0-28 54-28 54 0z" fill="#FFC933"/>
+      <rect x="158" y="121" width="64" height="7" rx="3" fill="#F5B800"/>
+      <path d="M190 100v21" stroke="#F5B800" stroke-width="4"/>
+
+      <!-- cara -->
+      <g class="ojos" fill="#2B2B2B">
+        <ellipse cx="177" cy="138" rx="3.5" ry="4.5"/>
+        <ellipse cx="199" cy="138" rx="3.5" ry="4.5"/>
+      </g>
+      <path d="M185 146l5 0-2.5 4z" fill="#F28B9B"/>
+      <path d="M188 151c-2 4-7 4-9 1M188 151c2 4 7 4 9 1" fill="none" stroke="#2B2B2B" stroke-width="1.6" stroke-linecap="round"/>
+      <path d="M170 148l-14-3M170 152l-14 3M206 148l14-3M206 152l14 3" stroke="#6B7280" stroke-width="1.2" stroke-linecap="round"/>
+
+      <!-- brazo con martillo -->
+      <g class="martillo">
+        <path d="M195 172H130" stroke="#A0693A" stroke-width="5" stroke-linecap="round"/>
+        <rect x="120" y="162" width="16" height="20" rx="3" fill="#8A8F98"/>
+        <rect x="120" y="162" width="16" height="6" rx="3" fill="#B4B9C2"/>
+        <circle cx="190" cy="172" r="8" fill="#F2A65A"/>
+      </g>
+    </g>
+  </svg>
+
+  <img class="logo" src="2b397365-2975-49ba-9a5c-0624f5827d45.png" alt="Logo de Comercial Sedyjo">
+  <h1>Estamos construyendo nuestra tienda</h1>
+  <p>Muy pronto podrás hacer tus compras online en Comercial Sedyjo.</p>
+</body>
+</html>
