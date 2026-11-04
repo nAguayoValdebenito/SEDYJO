@@ -11,10 +11,10 @@ test.describe("Proceso de compra", () => {
   test("buscar, agregar, pagar con éxito y vaciar el carrito", async ({ page }) => {
     await page.goto("/");
     const buscador = page.getByRole("search", { name: "Buscar en la tienda" });
-    await buscador.getByRole("searchbox").fill("arroz");
+    await buscador.getByRole("searchbox").fill("aceite");
     await buscador.getByRole("button", { name: "Buscar" }).click();
-    await expect(page).toHaveURL(/\/buscar\?q=arroz/);
-    await expect(page.getByRole("heading", { name: /Arroz grado 1/ })).toBeVisible();
+    await expect(page).toHaveURL(/\/buscar\?q=aceite/);
+    await expect(page.getByRole("heading", { name: /Aceite de Cocina/ })).toBeVisible();
 
     await page.getByRole("button", { name: "Agregar", exact: true }).first().click();
     await expect(carritoDelEncabezado(page)).not.toContainText("$0");
@@ -83,7 +83,7 @@ test.describe("Proceso de compra", () => {
   });
 
   test("al superar el monto mínimo el despacho es gratis", async ({ page }) => {
-    // Carrito de $53.910 (9 × $5.990): sobre el mínimo de despacho gratis.
+    // Carrito de $61.700 (5 × $12.340): sobre el mínimo de despacho gratis.
     await page.goto("/");
     await page.evaluate(() =>
       localStorage.setItem(
@@ -92,13 +92,13 @@ test.describe("Proceso de compra", () => {
           state: {
             items: [
               {
-                productoId: "p-006",
-                slug: "mayonesa-squeeze-2-un",
-                nombre: "Mayonesa squeeze 2 un.",
-                precio: 5990,
+                productoId: "21",
+                slug: "tabla-de-picar",
+                nombre: "Tabla de Picar",
+                precio: 12340,
                 imagen: null,
-                fondo: "#E9E9EC",
-                cantidad: 9,
+                fondo: "#F6E3A1",
+                cantidad: 5,
               },
             ],
           },

@@ -72,9 +72,12 @@ export function FichaProducto({
             )}
             {descuento && <Insignia variante="descuento">-{descuento}%</Insignia>}
           </div>
-          <p className="-mt-2 text-sm text-gris-texto">
-            {producto.unidad} · {producto.precioPorUnidad}
-          </p>
+          {producto.unidad && (
+            <p className="-mt-2 text-sm text-gris-texto">
+              {producto.unidad}
+              {producto.precioPorUnidad && ` · ${producto.precioPorUnidad}`}
+            </p>
+          )}
 
           <p className={`flex items-center gap-2 text-sm font-bold ${clase}`}>
             <Icono size={18} aria-hidden="true" />
@@ -128,8 +131,12 @@ export function FichaProducto({
                 <dd>{producto.marca}</dd>
               </>
             )}
-            <dt className="text-gris-texto">Presentación</dt>
-            <dd>{producto.unidad}</dd>
+            {producto.unidad && (
+              <>
+                <dt className="text-gris-texto">Presentación</dt>
+                <dd>{producto.unidad}</dd>
+              </>
+            )}
           </dl>
         </div>
       </div>

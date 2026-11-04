@@ -40,6 +40,16 @@ Reglas: las páginas de `app/` solo piden datos y arman secciones de `features/`
 backend solo cambia su interior); servidor por defecto, cliente solo para carrito, selector de cantidad,
 menú de categorías y carrusel.
 
+## Catálogo desde la API de Sedyjo
+
+Los productos y las categorías se leen de la API real (`https://api.sedyjo.com/api/v1`, solo `GET`, sin clave). La conexión vive en `src/lib/data/catalogo-api.ts` (red, caché de minutos) y `src/lib/data/adaptador-api.ts` (traduce la API a los tipos del frontend, con pruebas). Las pantallas siguen usando `getProducts`, `getCategories`, etc.
+
+- Para apuntar a otra API (por ejemplo la local en `http://localhost:3004`): variable de entorno `SEDYJO_API_URL`.
+- La API todavía no entrega slug, precio anterior, ofertas, marca ni unidad. El slug se genera del nombre; las ofertas y descuentos no se muestran hasta que existan; los destacados del inicio se reparten entre categorías de forma provisoria.
+- Los fondos de color por categoría los define el frontend (`fondoDeCategoria`).
+- Las fotos actuales son de prueba (DummyJSON); hay que reemplazarlas por fotos propias antes de publicar.
+- Los pedidos de ejemplo (`mock/pedidos.json`) siguen simulados, pero con productos reales del catálogo.
+
 ## Modal de ofertas especiales
 
 Una oferta simple o una galería con carrusel, que el administrador activa. Hoy se controla desde
