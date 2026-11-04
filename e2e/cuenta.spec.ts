@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./base";
 import {
   carritoDelEncabezado,
   completarDatosDeEntrega,
@@ -104,7 +104,7 @@ test.describe("Cuenta del cliente", () => {
     await page.getByRole("button", { name: "Guardar dirección" }).click();
     await expect(page.getByRole("heading", { name: "Trabajo" })).toBeVisible();
 
-    await page.goto("/categoria/despensa");
+    await page.goto("/categoria/abarrotes");
     await page.getByRole("button", { name: "Agregar", exact: true }).first().click();
     await irAPagarDesdeElPanel(page);
     // La principal aparece elegida y no se piden los campos de dirección.

@@ -1,9 +1,16 @@
 import { describe, expect, it } from "vitest";
 import {
+  adaptarBannersOscuros,
+  adaptarBannersPrincipales,
+  adaptarCampanaModal,
   adaptarCatalogo,
   adaptarCategorias,
+  bannerApiSchema,
   generarSlug,
+  precioPorUnidad,
   productoApiSchema,
+  rutaDesdeApi,
+  separarMarcaYUnidad,
   type ProductoApi,
 } from "./adaptador-api";
 
@@ -48,7 +55,7 @@ describe("adaptarCatalogo", () => {
       precio: 1001,
       precioAnterior: null,
       promo: null,
-      marca: null,
+      marca: "Manzana de prueba",
       imagenes: ["https://api.sedyjo.com/images/1.webp"],
     });
   });
@@ -83,5 +90,103 @@ describe("adaptarCategorias", () => {
       slug: "frutas-y-verduras",
       imagen: "https://api.sedyjo.com/images/1.webp",
     });
+  });
+});
+
+describe("separarMarcaYUnidad", () => {
+  it("separa 'Marca · presentación'", () => {
+    expect(separarMarcaYUnidad("Carozzi · 400 g")).toEqual({ marca: "Carozzi", unidad: "400 g" });
+    expect(separarMarcaYUnidad("Costa · 115 g / 4.06 oz")).toEqual({
+      marca: "Costa",
+      unidad: "115 g / 4.06 oz",
+    });
+  });
+
+  it("con una sola parte distingue marca de cantidad", () => {
+    expect(separarMarcaYUnidad("Supremo")).toEqual({ marca: "Supremo", unidad: "" });
+    expect(separarMarcaYUnidad("40 g")).toEqual({ marca: null, unidad: "40 g" });
+  });
+
+  it("tolera descripciones vacías", () => {
+    expect(separarMarcaYUnidad(null)).toEqual({ marca: null, unidad: "" });
+    expect(separarMarcaYUnidad("")).toEqual({ marca: null, unidad: "" });
+  });
+});
+
+describe("precioPorUnidad", () => {
+  it("calcula por kilo y por litro cuando la presentación es una sola cantidad", () => {
+    expect(precioPorUnidad(1290, "400 g")).toBe("$3.225 / kg");
+    expect(precioPorUnidad(2890, "2 kg")).toBe("$1.445 / kg");
+    expect(precioPorUnidad(2290, "1 L")).toBe("$2.290 / L");
+    expect(precioPorUnidad(990, "350 ml")).toBe("$2.829 / L");
+  });
+
+  it("no inventa nada con presentaciones ambiguas", () => {
+    expect(precioPorUnidad(290, "20g/1L")).toBe("");
+    expect(precioPorUnidad(1890, "1500")).toBe("");
+    expect(precioPorUnidad(1000, "")).toBe("");
+  });
+});
+
+describe("rutaDesdeApi", () => {
+  it("traduce /productos?category= a la ruta de categoría de la tienda", () => {
+    expect(rutaDesdeApi("/productos?category=T%C3%A9%20e%20Infusiones")).toBe(
+      "/categoria/te-e-infusiones",
+    );
+    expect(rutaDesdeApi("/productos?category=Galletas%20y%20Snacks")).toBe(
+      "/categoria/galletas-y-snacks",
+    );
+    expect(rutaDesdeApi("/productos")).toBe("/categoria");
+  });
+
+  it("deja pasar rutas internas y URL externas, y descarta lo demás", () => {
+    expect(rutaDesdeApi("/ofertas")).toBe("/ofertas");
+    expect(rutaDesdeApi("https://www.sedyjo.com/x")).toBe("https://www.sedyjo.com/x");
+    expect(rutaDesdeApi("javascript:alert(1)")).toBeNull();
+    expect(rutaDesdeApi(null)).toBeNull();
+  });
+});
+
+describe("banners", () => {
+  const banner = (id: number, placement: string, extra: Record<string, unknown> = {}) =>
+    bannerApiSchema.parse({
+      id,
+      placement,
+      title: `Banner ${id}`,
+      subtitle: "Subtítulo",
+      image: `https://api.sedyjo.com/images/b${id}.jpg`,
+      alt: null,
+      linkUrl: "/productos?category=Bebidas",
+      theme: "dorado",
+      ctaLabel: "Comprar",
+      position: id,
+      ...extra,
+    });
+  const lista = [
+    banner(3, "hero", { position: 2 }),
+    banner(1, "hero", { position: 1, ctaLabel: null }),
+    banner(4, "dark", { theme: "morado" }),
+    banner(5, "modal"),
+    banner(6, "modal"),
+  ];
+
+  it("ordena los principales por posición y deja el botón en null si falta el texto", () => {
+    const principales = adaptarBannersPrincipales(lista);
+    expect(principales.map((b) => b.id)).toEqual(["1", "3"]);
+    expect(principales[0].boton).toBeNull();
+    expect(principales[1].boton).toEqual({ texto: "Comprar", href: "/categoria/bebidas" });
+    expect(principales[1].alt).toBe("Banner 3");
+  });
+
+  it("toma el color de los oscuros del tema", () => {
+    const [oscuro] = adaptarBannersOscuros(lista);
+    expect(oscuro).toMatchObject({ titular: "Banner 4", colorTitular: "morado", cta: "Comprar" });
+  });
+
+  it("arma la campaña del modal con sus diapositivas", () => {
+    const campana = adaptarCampanaModal(lista);
+    expect(campana).toMatchObject({ tipo: "galeria", activo: true, id: "api-5-6" });
+    expect(campana?.slides).toHaveLength(2);
+    expect(adaptarCampanaModal([banner(1, "hero")])).toBeNull();
   });
 });

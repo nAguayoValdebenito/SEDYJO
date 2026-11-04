@@ -1,10 +1,16 @@
 import { cacheLife } from "next/cache";
 import { z } from "zod";
 import { URL_API } from "@/lib/config";
-import type { Categoria, Producto } from "@/types";
+import type { Banner, BannerOscuro, CampanaModal, Categoria, Producto } from "@/types";
 import {
+  adaptarBannersOscuros,
+  adaptarBannersPrincipales,
+  adaptarCampanaModal,
   adaptarCatalogo,
   adaptarCategorias,
+  bannerApiSchema,
+  categoriaApiSchema,
+  imagenesSitioApiSchema,
   respuestaProductosSchema,
   type ProductoApi,
 } from "./adaptador-api";
@@ -16,9 +22,9 @@ import {
 
 const POR_PAGINA = 100;
 
-const categoriasApiSchema = z.object({
-  data: z.array(z.object({ name: z.string(), count: z.number().int() })),
-});
+const categoriasApiSchema = z.object({ data: z.array(categoriaApiSchema) });
+const bannersApiSchema = z.object({ data: z.array(bannerApiSchema) });
+const imagenesSitioRespuestaSchema = z.object({ data: imagenesSitioApiSchema });
 
 async function pedirJson(ruta: string): Promise<unknown> {
   const respuesta = await fetch(`${URL_API}/api/v1${ruta}`, {
@@ -57,4 +63,53 @@ export async function obtenerCategorias(): Promise<Categoria[]> {
 
   const { data } = categoriasApiSchema.parse(await pedirJson("/categories"));
   return adaptarCategorias(data, await obtenerCatalogo());
+}
+
+type BannersDeLaPagina = {
+  principales: Banner[];
+  oscuros: BannerOscuro[];
+  campanaModal: CampanaModal | null;
+};
+
+/**
+ * Banners activos y vigentes (hero, dark y modal). Si la API falla, la portada sigue funcionando
+ * sin banners en vez de caerse.
+ */
+export async function obtenerBanners(): Promise<BannersDeLaPagina> {
+  "use cache";
+  cacheLife("minutes");
+
+  try {
+    const { data } = bannersApiSchema.parse(await pedirJson("/banners"));
+    return {
+      principales: adaptarBannersPrincipales(data),
+      oscuros: adaptarBannersOscuros(data),
+      campanaModal: adaptarCampanaModal(data),
+    };
+  } catch {
+    return { principales: [], oscuros: [], campanaModal: null };
+  }
+}
+
+/**
+ * Imágenes sueltas del sitio que se cambian sin tocar el código (`logo`, `favicon`, ...),
+ * por clave. Si una clave no existe, la tienda usa su imagen por defecto.
+ */
+export async function obtenerImagenesSitio(): Promise<
+  Record<string, { url: string; alt: string }>
+> {
+  "use cache";
+  cacheLife("minutes");
+
+  try {
+    const { data } = imagenesSitioRespuestaSchema.parse(await pedirJson("/site-images"));
+    return Object.fromEntries(
+      Object.entries(data).map(([clave, imagen]) => [
+        clave,
+        { url: imagen.url, alt: imagen.alt ?? "" },
+      ]),
+    );
+  } catch {
+    return {};
+  }
 }

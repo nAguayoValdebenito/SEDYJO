@@ -47,22 +47,28 @@ export type Coleccion = "semana" | "exclusivo-online";
 
 export type Banner = {
   id: string;
+  /** Texto pequeño sobre el título; vacío si no hay. */
   etiqueta: string;
   titulo: string;
   texto: string;
-  boton: { texto: string; href: string };
+  /** `null` si el banner no tiene enlace o texto de botón. */
+  boton: { texto: string; href: string } | null;
   imagen: string | null;
+  alt: string;
 };
 
 /** Banner secundario de fondo negro con dorado y morado neón. */
 export type BannerOscuro = {
   id: string;
-  insignia: string;
   titular: string;
   detalle: string;
   imagen: string;
   alt: string;
   colorTitular: "dorado" | "morado";
+  /** Ruta de la tienda o URL externa; `null` si el banner no enlaza a nada. */
+  href: string | null;
+  /** Texto del enlace (ej. "Comprar"). */
+  cta: string | null;
 };
 
 export type ItemCarrito = {

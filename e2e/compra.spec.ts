@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./base";
 import {
   agregarPrimerProducto,
   carritoDelEncabezado,
@@ -11,10 +11,10 @@ test.describe("Proceso de compra", () => {
   test("buscar, agregar, pagar con éxito y vaciar el carrito", async ({ page }) => {
     await page.goto("/");
     const buscador = page.getByRole("search", { name: "Buscar en la tienda" });
-    await buscador.getByRole("searchbox").fill("aceite");
+    await buscador.getByRole("searchbox").fill("spaghetti");
     await buscador.getByRole("button", { name: "Buscar" }).click();
-    await expect(page).toHaveURL(/\/buscar\?q=aceite/);
-    await expect(page.getByRole("heading", { name: /Aceite de Cocina/ })).toBeVisible();
+    await expect(page).toHaveURL(/\/buscar\?q=spaghetti/);
+    await expect(page.getByRole("heading", { name: /Spaghetti Carozzi/ })).toBeVisible();
 
     await page.getByRole("button", { name: "Agregar", exact: true }).first().click();
     await expect(carritoDelEncabezado(page)).not.toContainText("$0");
@@ -83,7 +83,7 @@ test.describe("Proceso de compra", () => {
   });
 
   test("al superar el monto mínimo el despacho es gratis", async ({ page }) => {
-    // Carrito de $61.700 (5 × $12.340): sobre el mínimo de despacho gratis.
+    // Carrito de $52.020 (18 × $2.890): sobre el mínimo de despacho gratis.
     await page.goto("/");
     await page.evaluate(() =>
       localStorage.setItem(
@@ -92,13 +92,13 @@ test.describe("Proceso de compra", () => {
           state: {
             items: [
               {
-                productoId: "21",
-                slug: "tabla-de-picar",
-                nombre: "Tabla de Picar",
-                precio: 12340,
+                productoId: "35",
+                slug: "arroz-premium-grado-1-banquete-2-kg",
+                nombre: "Arroz Premium Grado 1 Banquete 2 kg",
+                precio: 2890,
                 imagen: null,
                 fondo: "#F6E3A1",
-                cantidad: 5,
+                cantidad: 18,
               },
             ],
           },

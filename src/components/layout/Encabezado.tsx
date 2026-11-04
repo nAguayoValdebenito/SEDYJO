@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Contenedor } from "@/components/ui/Contenedor";
 import { BotonCarrito } from "@/features/carrito/components/BotonCarrito";
-import { getCategories } from "@/lib/data";
+import { getCategories, getImagenesSitio } from "@/lib/data";
 import { Buscador } from "./Buscador";
 import { EncabezadoPegajoso } from "./EncabezadoPegajoso";
 import { MenuCategorias } from "./MenuCategorias";
@@ -15,7 +15,13 @@ import { MenuCuenta } from "./MenuCuenta";
  * - escritorio (≥1024 px): versión completa con textos y total del carrito.
  */
 export async function Encabezado() {
-  const categorias = (await getCategories()).map(({ slug, nombre }) => ({ slug, nombre }));
+  const [categoriasCompletas, imagenesSitio] = await Promise.all([
+    getCategories(),
+    getImagenesSitio(),
+  ]);
+  const categorias = categoriasCompletas.map(({ slug, nombre }) => ({ slug, nombre }));
+  // El logo se puede cambiar desde la API; si no hay, se usa el que viene con la tienda.
+  const logo = imagenesSitio.logo?.url ?? "/logo.webp";
 
   return (
     <>
@@ -27,7 +33,7 @@ export async function Encabezado() {
             className="order-2 flex min-w-0 flex-1 items-center gap-2 sm:order-none sm:flex-none sm:gap-2.5 lg:gap-3"
           >
             <Image
-              src="/logo.webp"
+              src={logo}
               alt=""
               width={60}
               height={60}

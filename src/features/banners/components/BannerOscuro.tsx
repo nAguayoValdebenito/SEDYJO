@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { Insignia } from "@/components/ui/Insignia";
+import Link from "next/link";
 import { cn } from "@/lib/utils/cn";
 import type { BannerOscuro as BannerOscuroTipo } from "@/types";
 
@@ -7,9 +7,13 @@ type Props = {
   banner: BannerOscuroTipo;
 };
 
-/** Banner secundario: fondo negro con titular dorado o morado neón. */
+/**
+ * Banner secundario: fondo negro con titular dorado o morado neón. Si la API trae enlace, todo
+ * el banner es clicable desde el texto del botón (enlace "estirado": un solo foco, nombre claro).
+ */
 export function BannerOscuro({ banner }: Props) {
   const esDorado = banner.colorTitular === "dorado";
+  const colorTexto = esDorado ? "text-oro" : "text-morado";
 
   return (
     <article className="relative flex min-h-[140px] flex-[0_0_280px] snap-start flex-col justify-center gap-1 overflow-hidden rounded-[10px] bg-negro px-4 py-[18px] md:min-h-[182px] md:flex-auto md:gap-1.5 md:px-7 md:py-[26px]">
@@ -24,19 +28,10 @@ export function BannerOscuro({ banner }: Props) {
         />
       </div>
 
-      {esDorado ? (
-        <Insignia variante="morada" className="relative self-start">
-          {banner.insignia}
-        </Insignia>
-      ) : (
-        <span className="relative text-xs font-bold uppercase tracking-[0.08em] text-oro md:text-[13px]">
-          {banner.insignia}
-        </span>
-      )}
       <span
         className={cn(
           "relative font-titulos text-[30px] font-extrabold leading-none sm:text-[26px] lg:text-5xl",
-          esDorado ? "text-oro" : "text-morado",
+          colorTexto,
         )}
       >
         {banner.titular}
@@ -44,6 +39,18 @@ export function BannerOscuro({ banner }: Props) {
       <span className="relative max-w-[140px] text-[13px] text-white lg:max-w-[230px] lg:text-base">
         {banner.detalle}
       </span>
+      {banner.href && banner.cta && (
+        <Link
+          href={banner.href}
+          className={cn(
+            "relative mt-1 self-start text-sm font-bold underline-offset-4 hover:underline after:absolute after:inset-[-200px] after:content-[''] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-current md:text-[15px]",
+            colorTexto,
+          )}
+        >
+          {banner.cta}
+          <span className="sr-only">: {banner.titular}</span>
+        </Link>
+      )}
     </article>
   );
 }

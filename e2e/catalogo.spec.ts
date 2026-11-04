@@ -1,20 +1,22 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./base";
 
 test.describe("Catálogo, seguimiento y páginas del sistema", () => {
   test("la portada muestra el despacho gratis y las categorías", async ({ page }) => {
     await page.goto("/");
     await expect(page.getByRole("region", { name: "Despacho gratis" })).toContainText("$49.990");
-    await expect(page.getByRole("link", { name: /Despensa/ }).first()).toBeVisible();
+    await expect(page.getByRole("link", { name: /Abarrotes/ }).first()).toBeVisible();
     await expect(page).toHaveTitle(/Comercial Sedyjo/);
   });
 
   test("de la categoría a la ficha del producto", async ({ page }) => {
-    await page.goto("/categoria/despensa");
-    await page.getByRole("link", { name: "Aceite de Cocina" }).first().click();
-    await page.waitForURL("**/producto/aceite-de-cocina");
-    await expect(page.getByRole("heading", { level: 1, name: "Aceite de Cocina" })).toBeVisible();
+    await page.goto("/categoria/abarrotes");
+    await page.getByRole("link", { name: "Spaghetti Carozzi 400 g" }).first().click();
+    await page.waitForURL("**/producto/spaghetti-carozzi-400-g");
+    await expect(
+      page.getByRole("heading", { level: 1, name: "Spaghetti Carozzi 400 g" }),
+    ).toBeVisible();
     await expect(page.getByRole("navigation", { name: "Ruta de navegación" })).toContainText(
-      "Despensa",
+      "Abarrotes",
     );
     await expect(page.getByRole("button", { name: "Agregar", exact: true }).first()).toBeVisible();
     await expect(page.getByRole("heading", { name: "También te puede interesar" })).toBeVisible();
@@ -27,9 +29,9 @@ test.describe("Catálogo, seguimiento y páginas del sistema", () => {
     await page
       .getByRole("search", { name: "Buscar productos" })
       .getByRole("searchbox")
-      .fill("aceite");
+      .fill("spaghetti");
     await page.getByRole("search", { name: "Buscar productos" }).getByRole("button").click();
-    await expect(page).toHaveURL(/\/buscar\?q=aceite/);
+    await expect(page).toHaveURL(/\/buscar\?q=spaghetti/);
   });
 
   test("la búsqueda sin resultados lo informa", async ({ page }) => {
@@ -79,11 +81,11 @@ test.describe("Catálogo, seguimiento y páginas del sistema", () => {
     const robots = await request.get("/robots.txt");
     expect(await robots.text()).toContain("Disallow: /checkout");
     const sitemap = await request.get("/sitemap.xml");
-    expect(await sitemap.text()).toContain("/producto/aceite-de-cocina");
+    expect(await sitemap.text()).toContain("/producto/spaghetti-carozzi-400-g");
 
     await page.goto("/carrito");
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
-    await page.goto("/producto/aceite-de-cocina");
+    await page.goto("/producto/spaghetti-carozzi-400-g");
     await expect(page.locator('script[type="application/ld+json"]').first()).toBeAttached();
   });
 });

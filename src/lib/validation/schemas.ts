@@ -38,18 +38,20 @@ export const bannerSchema = z.object({
   etiqueta: z.string(),
   titulo: z.string(),
   texto: z.string(),
-  boton: z.object({ texto: z.string(), href: z.string() }),
+  boton: z.object({ texto: z.string(), href: z.string() }).nullable(),
   imagen: z.string().nullable(),
+  alt: z.string(),
 });
 
 export const bannerOscuroSchema = z.object({
   id: z.string(),
-  insignia: z.string(),
   titular: z.string(),
   detalle: z.string(),
   imagen: z.string(),
   alt: z.string(),
   colorTitular: z.enum(["dorado", "morado"]),
+  href: z.string().nullable(),
+  cta: z.string().nullable(),
 });
 
 export const bannersSchema = z.object({

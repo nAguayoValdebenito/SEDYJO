@@ -1,13 +1,14 @@
 import { cacheLife } from "next/cache";
-import { bannersSchema } from "@/lib/validation/schemas";
 import type { Banner, BannerOscuro } from "@/types";
-import bannersMock from "./mock/banners.json";
+import { obtenerBanners } from "./catalogo-api";
 
 type Banners = { principales: Banner[]; oscuros: BannerOscuro[] };
 
+/** Banners de la portada (carrusel principal y banners oscuros), desde la API de Sedyjo. */
 export async function getBanners(): Promise<Banners> {
   "use cache";
-  cacheLife("hours");
+  cacheLife("minutes");
 
-  return bannersSchema.parse(bannersMock);
+  const { principales, oscuros } = await obtenerBanners();
+  return { principales, oscuros };
 }
