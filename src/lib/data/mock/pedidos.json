@@ -16,45 +16,45 @@
     },
     "items": [
       {
-        "productoId": "5",
-        "slug": "aceite-de-cocina",
-        "nombre": "Aceite de Cocina",
-        "precio": 4740,
+        "productoId": "34",
+        "slug": "arroz-largo-ancho-miraflores-1-kg",
+        "nombre": "Arroz Largo Ancho Miraflores 1 kg",
+        "precio": 1590,
         "cantidad": 2,
-        "imagen": "https://api.sedyjo.com/images/aceite-de-cocina.webp",
-        "fondo": "#F3E0B5"
+        "imagen": "https://api.sedyjo.com/images/arroz-largo-ancho-miraflores-1-kg.jpg",
+        "fondo": "#F6E3A1"
       },
       {
-        "productoId": "8",
-        "slug": "huevos",
-        "nombre": "Huevos",
-        "precio": 2840,
+        "productoId": "32",
+        "slug": "spaghetti-carozzi-400-g",
+        "nombre": "Spaghetti Carozzi 400 g",
+        "precio": 1290,
         "cantidad": 3,
-        "imagen": "https://api.sedyjo.com/images/huevos.webp",
-        "fondo": "#F3E0B5"
+        "imagen": "https://api.sedyjo.com/images/spaghetti-carozzi-400-g.jpg",
+        "fondo": "#F6E3A1"
       },
       {
-        "productoId": "12",
-        "slug": "frasco-de-miel",
-        "nombre": "Frasco de Miel",
-        "precio": 6640,
+        "productoId": "29",
+        "slug": "atun-en-aceite-angelmo-160-g",
+        "nombre": "Atún en Aceite Angelmo 160 g",
+        "precio": 1790,
         "cantidad": 1,
-        "imagen": "https://api.sedyjo.com/images/frasco-de-miel.webp",
-        "fondo": "#F3E0B5"
+        "imagen": "https://api.sedyjo.com/images/atun-en-aceite-angelmo-160-g.jpg",
+        "fondo": "#F6E3A1"
       },
       {
-        "productoId": "1",
-        "slug": "manzana",
-        "nombre": "Manzana",
-        "precio": 1890,
+        "productoId": "2",
+        "slug": "coca-cola-sabor-original-591-ml",
+        "nombre": "Coca-Cola Sabor Original 591 ml",
+        "precio": 1490,
         "cantidad": 6,
-        "imagen": "https://api.sedyjo.com/images/manzana.webp",
-        "fondo": "#C9E8B5"
+        "imagen": "https://api.sedyjo.com/images/coca-cola-sabor-original-591-ml.jpg",
+        "fondo": "#BFE0F7"
       }
     ],
-    "subtotal": 35980,
+    "subtotal": 17780,
     "despacho": 2490,
-    "total": 38470,
+    "total": 20270,
     "metodoPago": "Webpay Plus (simulado)",
     "eventos": [
       {
@@ -96,45 +96,45 @@
     },
     "items": [
       {
-        "productoId": "3",
-        "slug": "comida-para-gatos",
-        "nombre": "Comida para Gatos",
-        "precio": 8540,
+        "productoId": "13",
+        "slug": "chocolate-costa-cacao-62-bitter-80-g",
+        "nombre": "Chocolate Costa Cacao 62% Bitter 80 g",
+        "precio": 1890,
         "cantidad": 2,
-        "imagen": "https://api.sedyjo.com/images/comida-para-gatos.webp",
-        "fondo": "#BFE8DF"
-      },
-      {
-        "productoId": "34",
-        "slug": "labial-rojo",
-        "nombre": "Labial Rojo",
-        "precio": 12340,
-        "cantidad": 1,
-        "imagen": "https://api.sedyjo.com/images/labial-rojo.webp",
+        "imagen": "https://api.sedyjo.com/images/chocolate-costa-cacao-62-bitter-80-g.jpg",
         "fondo": "#F8C9DA"
       },
       {
-        "productoId": "14",
-        "slug": "jugo",
-        "nombre": "Jugo",
-        "precio": 3790,
+        "productoId": "21",
+        "slug": "galletas-de-arroz-selz-100-g",
+        "nombre": "Galletas de Arroz Selz 100 g",
+        "precio": 1290,
         "cantidad": 1,
-        "imagen": "https://api.sedyjo.com/images/jugo.webp",
+        "imagen": "https://api.sedyjo.com/images/galletas-de-arroz-selz-100-g.jpg",
+        "fondo": "#F3E0B5"
+      },
+      {
+        "productoId": "6",
+        "slug": "jugo-guallarauco-mango-1-l",
+        "nombre": "Jugo Guallarauco Mango 1 L",
+        "precio": 2290,
+        "cantidad": 1,
+        "imagen": "https://api.sedyjo.com/images/jugo-guallarauco-mango-1-l.jpg",
         "fondo": "#BFE0F7"
       },
       {
-        "productoId": "4",
-        "slug": "pollo-trozado",
-        "nombre": "Pollo Trozado",
-        "precio": 9490,
+        "productoId": "31",
+        "slug": "mermelada-de-ciruela-orieta-500-g",
+        "nombre": "Mermelada de Ciruela Orieta 500 g",
+        "precio": 2190,
         "cantidad": 1,
-        "imagen": "https://api.sedyjo.com/images/pollo-trozado.webp",
-        "fondo": "#F5C6C0"
+        "imagen": "https://api.sedyjo.com/images/mermelada-de-ciruela-orieta-500-g.jpg",
+        "fondo": "#F6E3A1"
       }
     ],
-    "subtotal": 42700,
+    "subtotal": 9550,
     "despacho": 2490,
-    "total": 45190,
+    "total": 12040,
     "metodoPago": "Webpay Plus (simulado)",
     "eventos": [
       {
@@ -176,45 +176,45 @@
     },
     "items": [
       {
-        "productoId": "1",
-        "slug": "manzana",
-        "nombre": "Manzana",
-        "precio": 1890,
+        "productoId": "2",
+        "slug": "coca-cola-sabor-original-591-ml",
+        "nombre": "Coca-Cola Sabor Original 591 ml",
+        "precio": 1490,
         "cantidad": 6,
-        "imagen": "https://api.sedyjo.com/images/manzana.webp",
-        "fondo": "#C9E8B5"
+        "imagen": "https://api.sedyjo.com/images/coca-cola-sabor-original-591-ml.jpg",
+        "fondo": "#BFE0F7"
       },
       {
-        "productoId": "15",
-        "slug": "kiwi",
-        "nombre": "Kiwi",
-        "precio": 2370,
+        "productoId": "8",
+        "slug": "te-ceylan-premium-supremo-40-g",
+        "nombre": "Té Ceylán Premium Supremo 40 g",
+        "precio": 1590,
         "cantidad": 2,
-        "imagen": "https://api.sedyjo.com/images/kiwi.webp",
+        "imagen": "https://api.sedyjo.com/images/te-ceylan-premium-supremo-40-g.jpg",
         "fondo": "#C9E8B5"
       },
       {
-        "productoId": "6",
-        "slug": "pepino",
-        "nombre": "Pepino",
-        "precio": 1420,
-        "cantidad": 1,
-        "imagen": "https://api.sedyjo.com/images/pepino.webp",
-        "fondo": "#C9E8B5"
+        "productoId": "1",
+        "slug": "bebida-en-polvo-zuko-naranja-20-g",
+        "nombre": "Bebida en Polvo Zuko Naranja 20 g",
+        "precio": 290,
+        "cantidad": 4,
+        "imagen": "https://api.sedyjo.com/images/bebida-en-polvo-zuko-naranja-20-g.jpg",
+        "fondo": "#BFE0F7"
       },
       {
-        "productoId": "13",
-        "slug": "helado",
-        "nombre": "Helado",
-        "precio": 5220,
-        "cantidad": 1,
-        "imagen": "https://api.sedyjo.com/images/helado.webp",
-        "fondo": "#CFE6F5"
+        "productoId": "19",
+        "slug": "turron-y-mani-arcor-25-g",
+        "nombre": "Turrón y Maní Arcor 25 g",
+        "precio": 390,
+        "cantidad": 3,
+        "imagen": "https://api.sedyjo.com/images/turron-y-mani-arcor-25-g.jpg",
+        "fondo": "#F8C9DA"
       }
     ],
-    "subtotal": 22720,
+    "subtotal": 14450,
     "despacho": 2490,
-    "total": 25210,
+    "total": 16940,
     "metodoPago": "Webpay Plus (simulado)",
     "eventos": [
       {
@@ -251,45 +251,45 @@
     },
     "items": [
       {
-        "productoId": "21",
-        "slug": "tabla-de-picar",
-        "nombre": "Tabla de Picar",
-        "precio": 12340,
+        "productoId": "14",
+        "slug": "chocolate-costa-rama-de-leche-115-g",
+        "nombre": "Chocolate Costa Rama de Leche 115 g",
+        "precio": 2290,
         "cantidad": 2,
-        "imagen": "https://api.sedyjo.com/images/tabla-de-picar.webp",
-        "fondo": "#F6E3A1"
-      },
-      {
-        "productoId": "35",
-        "slug": "esmalte-de-unas-rojo",
-        "nombre": "Esmalte de Uñas Rojo",
-        "precio": 8540,
-        "cantidad": 1,
-        "imagen": "https://api.sedyjo.com/images/esmalte-de-unas-rojo.webp",
+        "imagen": "https://api.sedyjo.com/images/chocolate-costa-rama-de-leche-115-g.jpg",
         "fondo": "#F8C9DA"
       },
       {
-        "productoId": "8",
-        "slug": "huevos",
-        "nombre": "Huevos",
-        "precio": 2840,
+        "productoId": "23",
+        "slug": "galletas-costa-chocolate-140-g",
+        "nombre": "Galletas Costa Chocolate 140 g",
+        "precio": 1690,
         "cantidad": 1,
-        "imagen": "https://api.sedyjo.com/images/huevos.webp",
+        "imagen": "https://api.sedyjo.com/images/galletas-costa-chocolate-140-g.jpg",
         "fondo": "#F3E0B5"
       },
       {
-        "productoId": "14",
-        "slug": "jugo",
-        "nombre": "Jugo",
-        "precio": 3790,
+        "productoId": "33",
+        "slug": "lasagna-precocida-carozzi-330-g",
+        "nombre": "Lasagna Precocida Carozzi 330 g",
+        "precio": 1990,
         "cantidad": 1,
-        "imagen": "https://api.sedyjo.com/images/jugo.webp",
+        "imagen": "https://api.sedyjo.com/images/lasagna-precocida-carozzi-330-g.jpg",
+        "fondo": "#F6E3A1"
+      },
+      {
+        "productoId": "4",
+        "slug": "bebida-crush-orange-lata-350-ml",
+        "nombre": "Bebida Crush Orange Lata 350 ml",
+        "precio": 990,
+        "cantidad": 4,
+        "imagen": "https://api.sedyjo.com/images/bebida-crush-orange-lata-350-ml.jpg",
         "fondo": "#BFE0F7"
       }
     ],
-    "subtotal": 39850,
+    "subtotal": 12220,
     "despacho": 2490,
-    "total": 42340,
+    "total": 14710,
     "metodoPago": "Webpay Plus (simulado)",
     "eventos": [
       {

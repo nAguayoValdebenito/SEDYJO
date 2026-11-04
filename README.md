@@ -42,13 +42,16 @@ menú de categorías y carrusel.
 
 ## Catálogo desde la API de Sedyjo
 
-Los productos y las categorías se leen de la API real (`https://api.sedyjo.com/api/v1`, solo `GET`, sin clave). La conexión vive en `src/lib/data/catalogo-api.ts` (red, caché de minutos) y `src/lib/data/adaptador-api.ts` (traduce la API a los tipos del frontend, con pruebas). Las pantallas siguen usando `getProducts`, `getCategories`, etc.
+Productos, categorías, banners e imágenes del sitio se leen de la API real (`https://api.sedyjo.com/api/v1`, solo `GET`, sin clave). La conexión vive en `src/lib/data/catalogo-api.ts` (red, caché de minutos) y `src/lib/data/adaptador-api.ts` (traduce la API a los tipos del frontend, con pruebas). Las pantallas siguen usando `getProducts`, `getCategories`, `getBanners`, `getCampanaModal` y `getImagenesSitio`.
 
 - Para apuntar a otra API (por ejemplo la local en `http://localhost:3004`): variable de entorno `SEDYJO_API_URL`.
-- La API todavía no entrega slug, precio anterior, ofertas, marca ni unidad. El slug se genera del nombre; las ofertas y descuentos no se muestran hasta que existan; los destacados del inicio se reparten entre categorías de forma provisoria.
-- Los fondos de color por categoría los define el frontend (`fondoDeCategoria`).
-- Las fotos actuales son de prueba (DummyJSON); hay que reemplazarlas por fotos propias antes de publicar.
+- **Productos:** el slug se genera del nombre. La descripción llega como "Marca · presentación" y se separa en marca y unidad; el precio por kilo o litro se calcula cuando la presentación es una sola cantidad. La API aún no entrega ofertas ni precio anterior: no se muestran descuentos, y los "Productos destacados" del inicio se reparten entre categorías de forma provisoria.
+- **Categorías:** foto de la API (`image`) o, si falta, la de su primer producto. Los fondos de color los define el frontend (`fondoDeCategoria`).
+- **Banners** (`/banners`): `hero` → carrusel principal, `dark` → banners oscuros, `modal` → diapositivas del modal de ofertas (aparece solo si hay). La API valida los tamaños (`/image-rules`; ver `docs/guia-de-imagenes.md`). Los enlaces `/productos?category=X` se traducen a `/categoria/<slug>`. Si la API de banners falla, la portada se muestra sin ellos.
+- **Imágenes del sitio** (`/site-images`): hoy el encabezado usa la clave `logo` si existe; `favicon`, `apple-icon` y `og-image` siguen siendo los archivos del proyecto.
+- Las fotos y los banners actuales son de prueba (Open Food Facts y Lorem Picsum); hay que reemplazarlos por material propio antes de publicar.
 - Los pedidos de ejemplo (`mock/pedidos.json`) siguen simulados, pero con productos reales del catálogo.
+- En las pruebas E2E el modal de ofertas se marca como cerrado (`e2e/base.ts`) para que no tape la página.
 
 ## Modal de ofertas especiales
 

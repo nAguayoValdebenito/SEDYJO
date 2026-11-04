@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { AnimatePresence, LazyMotion, domAnimation, m } from "motion/react";
@@ -85,26 +86,45 @@ export function BannerPrincipal({ banners }: Props) {
           >
             <div
               aria-hidden={banner.imagen ? undefined : true}
-              className="absolute right-3.5 top-[18px] flex h-[110px] w-[38%] items-center justify-center rounded-lg border-2 border-dashed border-verde p-1.5 text-center text-[11px] text-verde-oscuro md:bottom-20 md:right-9 md:top-9 md:h-auto md:w-[44%] md:rounded-[10px] md:p-3 md:text-[13px]"
+              className={cn(
+                "absolute right-3.5 top-[18px] h-[110px] w-[38%] md:bottom-20 md:right-9 md:top-9 md:h-auto md:w-[44%]",
+                !banner.imagen &&
+                  "flex items-center justify-center rounded-lg border-2 border-dashed border-verde p-1.5 text-center text-[11px] text-verde-oscuro md:rounded-[10px] md:p-3 md:text-[13px]",
+              )}
             >
-              [imagen del banner principal]
+              {banner.imagen ? (
+                <Image
+                  src={banner.imagen}
+                  alt={banner.alt}
+                  fill
+                  priority={indice === 0}
+                  sizes="(min-width: 768px) 260px, 140px"
+                  className="object-contain"
+                />
+              ) : (
+                "[imagen del banner principal]"
+              )}
             </div>
 
-            <span className="relative text-xs font-bold uppercase tracking-[0.12em] text-verde-oscuro">
-              {banner.etiqueta}
-            </span>
+            {banner.etiqueta && (
+              <span className="relative text-xs font-bold uppercase tracking-[0.12em] text-verde-oscuro">
+                {banner.etiqueta}
+              </span>
+            )}
             <h2 className="relative max-w-[170px] font-titulos text-[28px] font-extrabold leading-[1.02] md:max-w-[300px] md:text-[46px]">
               {banner.titulo}
             </h2>
             <p className="relative hidden max-w-[280px] text-[15px] leading-normal text-gris-medio md:block">
               {banner.texto}
             </p>
-            <Link
-              href={banner.boton.href}
-              className={claseBoton("primario", "lg", "relative mt-1 self-start md:mt-0")}
-            >
-              {banner.boton.texto}
-            </Link>
+            {banner.boton && (
+              <Link
+                href={banner.boton.href}
+                className={claseBoton("primario", "lg", "relative mt-1 self-start md:mt-0")}
+              >
+                {banner.boton.texto}
+              </Link>
+            )}
           </m.div>
         </AnimatePresence>
       </LazyMotion>

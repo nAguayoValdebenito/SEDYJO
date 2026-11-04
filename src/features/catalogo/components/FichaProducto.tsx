@@ -59,7 +59,10 @@ export function FichaProducto({
           <h1 className="font-titulos text-[28px] font-extrabold leading-tight md:text-4xl">
             {producto.nombre}
           </h1>
-          <p className="text-gris-medio">{producto.descripcionCorta}</p>
+          {/* La API entrega "Marca · presentación" como descripción: ya se muestran aparte. */}
+          {!producto.marca && !producto.unidad && producto.descripcionCorta && (
+            <p className="text-gris-medio">{producto.descripcionCorta}</p>
+          )}
 
           <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
             <span className="font-titulos text-4xl font-extrabold leading-none tabular-nums md:text-5xl">

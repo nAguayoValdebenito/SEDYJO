@@ -13,7 +13,7 @@ export async function iniciarSesionDemo(page: Page, correo = "demo@sedyjo.cl") {
 }
 
 /** Agrega el primer producto disponible de una categoría al carrito. */
-export async function agregarPrimerProducto(page: Page, ruta = "/categoria/despensa") {
+export async function agregarPrimerProducto(page: Page, ruta = "/categoria/abarrotes") {
   await page.goto(ruta);
   const agregar = page.getByRole("button", { name: "Agregar", exact: true }).first();
   await agregar.click();

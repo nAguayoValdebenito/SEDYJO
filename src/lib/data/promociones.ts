@@ -1,22 +1,14 @@
 import { cacheLife } from "next/cache";
-import { campanaModalSchema } from "@/lib/validation/schemas";
 import type { CampanaModal } from "@/types";
-import campanaMock from "./mock/campana-modal.json";
+import { obtenerBanners } from "./catalogo-api";
 
 /**
- * Campaña del modal de ofertas especiales.
- * Hoy lee un JSON simulado (`mock/campana-modal.json`: `activo: true` la enciende); cuando
- * exista el panel de administración solo cambia el interior de esta función.
- * Devuelve `null` si el administrador no la ha activado. En desarrollo `incluirInactiva`
- * permite previsualizarla con `?promo=simple` o `?promo=galeria`.
+ * Campaña del modal de ofertas especiales: las diapositivas son los banners `modal` activos y
+ * vigentes de la API. Devuelve `null` si no hay ninguno.
  */
-export async function getCampanaModal(opciones?: {
-  incluirInactiva?: boolean;
-}): Promise<CampanaModal | null> {
+export async function getCampanaModal(): Promise<CampanaModal | null> {
   "use cache";
   cacheLife("minutes");
 
-  const campana = campanaModalSchema.parse(campanaMock);
-  if (campana.slides.length === 0) return null;
-  return campana.activo || opciones?.incluirInactiva ? campana : null;
+  return (await obtenerBanners()).campanaModal;
 }
