@@ -80,7 +80,9 @@ export function TarjetaProducto({ producto, className, style, nivelTitulo = 3 }:
             {producto.nombre}
           </Link>
         </Titulo>
-        <span className="text-xs text-gris-texto">{producto.precioPorUnidad}</span>
+        {producto.precioPorUnidad && (
+          <span className="text-xs text-gris-texto">{producto.precioPorUnidad}</span>
+        )}
         <div className="mb-1.5 mt-1 flex items-baseline gap-1.5 md:mb-2 md:mt-1.5 md:gap-2">
           <span className="font-titulos text-xl font-extrabold leading-none md:text-[26px]">
             {formatoPrecio(producto.precio)}

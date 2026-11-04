@@ -12,6 +12,12 @@ export const COSTO_DESPACHO: number | null = null;
 /** Comunas atendidas. Pendiente de definir con el negocio. */
 export const ZONAS_DESPACHO: string[] | null = null;
 
+/**
+ * Dirección de la API de productos de Sedyjo, sin barra final (solo se usa en el servidor).
+ * Se puede cambiar con `SEDYJO_API_URL`, por ejemplo a `http://localhost:3004` en desarrollo.
+ */
+export const URL_API = (process.env.SEDYJO_API_URL ?? "https://api.sedyjo.com").replace(/\/$/, "");
+
 /** Celular de contacto (formato internacional para enlaces `tel:` y visible). */
 export const TELEFONO_CONTACTO = "+56966423803";
 export const TELEFONO_CONTACTO_VISIBLE = "+56 9 6642 3803";

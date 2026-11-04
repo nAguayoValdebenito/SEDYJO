@@ -12,8 +12,8 @@ type Props = {
 
 /**
  * Menú de cuenta del header. Se abre al pasar el cursor, con clic o con teclado.
- * Sin sesión: Iniciar sesión y Registrarse. Con sesión (simulada): saludo, Mi cuenta,
- * Mis pedidos y Cerrar sesión.
+ * Sin sesión: Iniciar sesión y Registrarse. Con sesión (simulada): Mi cuenta y Cerrar sesión;
+ * pedidos, direcciones y perfil se eligen con las pestañas de Mi cuenta.
  */
 export function MenuCuenta({ className }: Props) {
   const hidratado = useHidratado();
@@ -23,13 +23,7 @@ export function MenuCuenta({ className }: Props) {
   const conSesion = hidratado && usuario !== null;
 
   const items: ItemMenu[] = conSesion
-    ? [
-        { tipo: "texto", texto: `Hola, ${usuario.nombre}` },
-        { tipo: "enlace", href: "/cuenta", texto: "Mi cuenta" },
-        { tipo: "enlace", href: "/cuenta/pedidos", texto: "Mis pedidos" },
-        { tipo: "enlace", href: "/cuenta/direcciones", texto: "Direcciones" },
-        { tipo: "enlace", href: "/cuenta/perfil", texto: "Mi perfil" },
-      ]
+    ? [{ tipo: "enlace", href: "/cuenta", texto: "Mi cuenta" }]
     : [
         { tipo: "enlace", href: "/ingresar", texto: "Iniciar sesión" },
         { tipo: "enlace", href: "/registro", texto: "Registrarse" },

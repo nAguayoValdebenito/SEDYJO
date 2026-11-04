@@ -37,7 +37,11 @@ export function TarjetaProductoOscura({ producto }: Props) {
             {producto.nombre}
           </Link>
         </h3>
-        <span className="hidden text-xs text-gris-claro md:block">{producto.precioPorUnidad}</span>
+        {producto.precioPorUnidad && (
+          <span className="hidden text-xs text-gris-claro md:block">
+            {producto.precioPorUnidad}
+          </span>
+        )}
         <span className="mb-1.5 font-titulos text-[22px] font-extrabold leading-[1.1] text-oro md:mb-2 md:mt-1.5 md:text-[30px] md:leading-none">
           {producto.promo ?? formatoPrecio(producto.precio)}
         </span>

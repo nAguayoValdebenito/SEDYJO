@@ -14,8 +14,8 @@ export async function SeccionOfertasSemana() {
     >
       <EncabezadoSeccion
         id="titulo-ofertas"
-        titulo="Ofertas de la semana"
-        enlace={{ texto: "Ver todas", href: "/ofertas" }}
+        titulo="Productos destacados"
+        enlace={{ texto: "Ver categorías", href: "/categoria" }}
       />
       <RevelarGrupo className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3.5 lg:grid-cols-[repeat(auto-fit,minmax(210px,1fr))] lg:gap-4">
         {productos.map((p) => (

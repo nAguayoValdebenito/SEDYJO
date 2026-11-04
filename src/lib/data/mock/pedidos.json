@@ -16,45 +16,45 @@
     },
     "items": [
       {
-        "productoId": "p-007",
-        "slug": "arroz-grado-1-1-kg",
-        "nombre": "Arroz grado 1 1 kg",
-        "precio": 1590,
+        "productoId": "5",
+        "slug": "aceite-de-cocina",
+        "nombre": "Aceite de Cocina",
+        "precio": 4740,
         "cantidad": 2,
-        "imagen": null,
-        "fondo": "#F6E3A1"
+        "imagen": "https://api.sedyjo.com/images/aceite-de-cocina.webp",
+        "fondo": "#F3E0B5"
       },
       {
-        "productoId": "p-008",
-        "slug": "fideos-espagueti-400-g",
-        "nombre": "Fideos espagueti 400 g",
-        "precio": 990,
+        "productoId": "8",
+        "slug": "huevos",
+        "nombre": "Huevos",
+        "precio": 2840,
         "cantidad": 3,
-        "imagen": null,
-        "fondo": "#F6E3A1"
+        "imagen": "https://api.sedyjo.com/images/huevos.webp",
+        "fondo": "#F3E0B5"
       },
       {
-        "productoId": "p-009",
-        "slug": "aceite-vegetal-1-l",
-        "nombre": "Aceite vegetal 1 L",
-        "precio": 2790,
+        "productoId": "12",
+        "slug": "frasco-de-miel",
+        "nombre": "Frasco de Miel",
+        "precio": 6640,
         "cantidad": 1,
-        "imagen": null,
-        "fondo": "#F6E3A1"
+        "imagen": "https://api.sedyjo.com/images/frasco-de-miel.webp",
+        "fondo": "#F3E0B5"
       },
       {
-        "productoId": "p-004",
-        "slug": "leche-entera-1-l",
-        "nombre": "Leche entera 1 L",
-        "precio": 1090,
+        "productoId": "1",
+        "slug": "manzana",
+        "nombre": "Manzana",
+        "precio": 1890,
         "cantidad": 6,
-        "imagen": null,
-        "fondo": "#BFE0F7"
+        "imagen": "https://api.sedyjo.com/images/manzana.webp",
+        "fondo": "#C9E8B5"
       }
     ],
-    "subtotal": 15480,
+    "subtotal": 35980,
     "despacho": 2490,
-    "total": 17970,
+    "total": 38470,
     "metodoPago": "Webpay Plus (simulado)",
     "eventos": [
       {
@@ -96,45 +96,45 @@
     },
     "items": [
       {
-        "productoId": "p-003",
-        "slug": "galletas-surtidas-400-g",
-        "nombre": "Galletas surtidas 400 g",
-        "precio": 1390,
+        "productoId": "3",
+        "slug": "comida-para-gatos",
+        "nombre": "Comida para Gatos",
+        "precio": 8540,
         "cantidad": 2,
-        "imagen": "/images/productos/galletas.webp",
+        "imagen": "https://api.sedyjo.com/images/comida-para-gatos.webp",
+        "fondo": "#BFE8DF"
+      },
+      {
+        "productoId": "34",
+        "slug": "labial-rojo",
+        "nombre": "Labial Rojo",
+        "precio": 12340,
+        "cantidad": 1,
+        "imagen": "https://api.sedyjo.com/images/labial-rojo.webp",
         "fondo": "#F8C9DA"
       },
       {
-        "productoId": "p-005",
-        "slug": "shampoo-400-ml",
-        "nombre": "Shampoo 400 ml",
-        "precio": 2190,
+        "productoId": "14",
+        "slug": "jugo",
+        "nombre": "Jugo",
+        "precio": 3790,
         "cantidad": 1,
-        "imagen": null,
-        "fondo": "#E3D3F5"
+        "imagen": "https://api.sedyjo.com/images/jugo.webp",
+        "fondo": "#BFE0F7"
       },
       {
-        "productoId": "p-002",
-        "slug": "detergente-liquido-3-l",
-        "nombre": "Detergente líquido 3 L",
-        "precio": 7890,
+        "productoId": "4",
+        "slug": "pollo-trozado",
+        "nombre": "Pollo Trozado",
+        "precio": 9490,
         "cantidad": 1,
-        "imagen": null,
-        "fondo": "#C9E8B5"
-      },
-      {
-        "productoId": "p-021",
-        "slug": "papel-higienico-12-rollos",
-        "nombre": "Papel higiénico 12 rollos",
-        "precio": 5490,
-        "cantidad": 1,
-        "imagen": null,
-        "fondo": "#BFE8DF"
+        "imagen": "https://api.sedyjo.com/images/pollo-trozado.webp",
+        "fondo": "#F5C6C0"
       }
     ],
-    "subtotal": 18350,
+    "subtotal": 42700,
     "despacho": 2490,
-    "total": 20840,
+    "total": 45190,
     "metodoPago": "Webpay Plus (simulado)",
     "eventos": [
       {
@@ -176,45 +176,45 @@
     },
     "items": [
       {
-        "productoId": "p-004",
-        "slug": "leche-entera-1-l",
-        "nombre": "Leche entera 1 L",
-        "precio": 1090,
+        "productoId": "1",
+        "slug": "manzana",
+        "nombre": "Manzana",
+        "precio": 1890,
         "cantidad": 6,
-        "imagen": null,
-        "fondo": "#BFE0F7"
+        "imagen": "https://api.sedyjo.com/images/manzana.webp",
+        "fondo": "#C9E8B5"
       },
       {
-        "productoId": "p-011",
-        "slug": "atun-en-agua-170-g",
-        "nombre": "Atún en agua 170 g",
-        "precio": 1390,
+        "productoId": "15",
+        "slug": "kiwi",
+        "nombre": "Kiwi",
+        "precio": 2370,
         "cantidad": 2,
-        "imagen": null,
-        "fondo": "#F6E3A1"
+        "imagen": "https://api.sedyjo.com/images/kiwi.webp",
+        "fondo": "#C9E8B5"
       },
       {
-        "productoId": "p-022",
-        "slug": "cloro-1-l",
-        "nombre": "Cloro 1 L",
-        "precio": 1190,
+        "productoId": "6",
+        "slug": "pepino",
+        "nombre": "Pepino",
+        "precio": 1420,
         "cantidad": 1,
-        "imagen": null,
-        "fondo": "#BFE8DF"
+        "imagen": "https://api.sedyjo.com/images/pepino.webp",
+        "fondo": "#C9E8B5"
       },
       {
-        "productoId": "p-024",
-        "slug": "bolsas-de-basura-20-un",
-        "nombre": "Bolsas de basura 20 un.",
-        "precio": 1490,
+        "productoId": "13",
+        "slug": "helado",
+        "nombre": "Helado",
+        "precio": 5220,
         "cantidad": 1,
-        "imagen": null,
-        "fondo": "#BFE8DF"
+        "imagen": "https://api.sedyjo.com/images/helado.webp",
+        "fondo": "#CFE6F5"
       }
     ],
-    "subtotal": 12000,
+    "subtotal": 22720,
     "despacho": 2490,
-    "total": 14490,
+    "total": 25210,
     "metodoPago": "Webpay Plus (simulado)",
     "eventos": [
       {
@@ -251,45 +251,45 @@
     },
     "items": [
       {
-        "productoId": "p-014",
-        "slug": "chocolate-de-leche-100-g",
-        "nombre": "Chocolate de leche 100 g",
-        "precio": 1290,
+        "productoId": "21",
+        "slug": "tabla-de-picar",
+        "nombre": "Tabla de Picar",
+        "precio": 12340,
         "cantidad": 2,
-        "imagen": null,
+        "imagen": "https://api.sedyjo.com/images/tabla-de-picar.webp",
+        "fondo": "#F6E3A1"
+      },
+      {
+        "productoId": "35",
+        "slug": "esmalte-de-unas-rojo",
+        "nombre": "Esmalte de Uñas Rojo",
+        "precio": 8540,
+        "cantidad": 1,
+        "imagen": "https://api.sedyjo.com/images/esmalte-de-unas-rojo.webp",
         "fondo": "#F8C9DA"
       },
       {
-        "productoId": "p-012",
-        "slug": "lentejas-500-g",
-        "nombre": "Lentejas 500 g",
-        "precio": 1290,
+        "productoId": "8",
+        "slug": "huevos",
+        "nombre": "Huevos",
+        "precio": 2840,
         "cantidad": 1,
-        "imagen": null,
-        "fondo": "#F6E3A1"
+        "imagen": "https://api.sedyjo.com/images/huevos.webp",
+        "fondo": "#F3E0B5"
       },
       {
-        "productoId": "p-013",
-        "slug": "te-negro-25-bolsitas",
-        "nombre": "Té negro 25 bolsitas",
-        "precio": 1190,
+        "productoId": "14",
+        "slug": "jugo",
+        "nombre": "Jugo",
+        "precio": 3790,
         "cantidad": 1,
-        "imagen": null,
-        "fondo": "#F6E3A1"
-      },
-      {
-        "productoId": "p-025",
-        "slug": "jabon-de-tocador-3-un",
-        "nombre": "Jabón de tocador 3 un.",
-        "precio": 1990,
-        "cantidad": 1,
-        "imagen": null,
-        "fondo": "#E3D3F5"
+        "imagen": "https://api.sedyjo.com/images/jugo.webp",
+        "fondo": "#BFE0F7"
       }
     ],
-    "subtotal": 7050,
-    "despacho": 0,
-    "total": 7050,
+    "subtotal": 39850,
+    "despacho": 2490,
+    "total": 42340,
     "metodoPago": "Webpay Plus (simulado)",
     "eventos": [
       {
