@@ -1,0 +1,307 @@
+[
+  {
+    "id": "ped-10482",
+    "numero": "SED-10482",
+    "usuarioId": "u-demo",
+    "correo": "demo@sedyjo.cl",
+    "fecha": "2026-09-18T16:20:00-03:00",
+    "estado": "entregado",
+    "metodoEntrega": "despacho",
+    "direccion": {
+      "calle": "Los Aromos",
+      "numero": "1234",
+      "comuna": "San Pedro de la Paz",
+      "region": "Biobío",
+      "referencia": "Casa con reja verde"
+    },
+    "items": [
+      {
+        "productoId": "p-007",
+        "slug": "arroz-grado-1-1-kg",
+        "nombre": "Arroz grado 1 1 kg",
+        "precio": 1590,
+        "cantidad": 2,
+        "imagen": null,
+        "fondo": "#F6E3A1"
+      },
+      {
+        "productoId": "p-008",
+        "slug": "fideos-espagueti-400-g",
+        "nombre": "Fideos espagueti 400 g",
+        "precio": 990,
+        "cantidad": 3,
+        "imagen": null,
+        "fondo": "#F6E3A1"
+      },
+      {
+        "productoId": "p-009",
+        "slug": "aceite-vegetal-1-l",
+        "nombre": "Aceite vegetal 1 L",
+        "precio": 2790,
+        "cantidad": 1,
+        "imagen": null,
+        "fondo": "#F6E3A1"
+      },
+      {
+        "productoId": "p-004",
+        "slug": "leche-entera-1-l",
+        "nombre": "Leche entera 1 L",
+        "precio": 1090,
+        "cantidad": 6,
+        "imagen": null,
+        "fondo": "#BFE0F7"
+      }
+    ],
+    "subtotal": 15480,
+    "despacho": 2490,
+    "total": 17970,
+    "metodoPago": "Webpay Plus (simulado)",
+    "eventos": [
+      {
+        "estado": "recibido",
+        "fecha": "2026-09-18T16:20:00-03:00",
+        "detalle": "Recibimos tu pedido y tu pago."
+      },
+      {
+        "estado": "preparando",
+        "fecha": "2026-09-18T17:05:00-03:00",
+        "detalle": "Estamos armando tu pedido."
+      },
+      {
+        "estado": "en-camino",
+        "fecha": "2026-09-19T10:40:00-03:00",
+        "detalle": "Salió a reparto."
+      },
+      {
+        "estado": "entregado",
+        "fecha": "2026-09-19T12:15:00-03:00",
+        "detalle": "Entregado a Ana Pérez."
+      }
+    ]
+  },
+  {
+    "id": "ped-10517",
+    "numero": "SED-10517",
+    "usuarioId": "u-demo",
+    "correo": "demo@sedyjo.cl",
+    "fecha": "2026-10-14T11:05:00-03:00",
+    "estado": "entregado",
+    "metodoEntrega": "despacho",
+    "direccion": {
+      "calle": "Los Aromos",
+      "numero": "1234",
+      "comuna": "San Pedro de la Paz",
+      "region": "Biobío",
+      "referencia": "Casa con reja verde"
+    },
+    "items": [
+      {
+        "productoId": "p-003",
+        "slug": "galletas-surtidas-400-g",
+        "nombre": "Galletas surtidas 400 g",
+        "precio": 1390,
+        "cantidad": 2,
+        "imagen": "/images/productos/galletas.webp",
+        "fondo": "#F8C9DA"
+      },
+      {
+        "productoId": "p-005",
+        "slug": "shampoo-400-ml",
+        "nombre": "Shampoo 400 ml",
+        "precio": 2190,
+        "cantidad": 1,
+        "imagen": null,
+        "fondo": "#E3D3F5"
+      },
+      {
+        "productoId": "p-002",
+        "slug": "detergente-liquido-3-l",
+        "nombre": "Detergente líquido 3 L",
+        "precio": 7890,
+        "cantidad": 1,
+        "imagen": null,
+        "fondo": "#C9E8B5"
+      },
+      {
+        "productoId": "p-021",
+        "slug": "papel-higienico-12-rollos",
+        "nombre": "Papel higiénico 12 rollos",
+        "precio": 5490,
+        "cantidad": 1,
+        "imagen": null,
+        "fondo": "#BFE8DF"
+      }
+    ],
+    "subtotal": 18350,
+    "despacho": 2490,
+    "total": 20840,
+    "metodoPago": "Webpay Plus (simulado)",
+    "eventos": [
+      {
+        "estado": "recibido",
+        "fecha": "2026-10-14T11:05:00-03:00",
+        "detalle": "Recibimos tu pedido y tu pago."
+      },
+      {
+        "estado": "preparando",
+        "fecha": "2026-10-14T11:50:00-03:00",
+        "detalle": "Estamos armando tu pedido."
+      },
+      {
+        "estado": "en-camino",
+        "fecha": "2026-10-14T16:10:00-03:00",
+        "detalle": "Salió a reparto."
+      },
+      {
+        "estado": "entregado",
+        "fecha": "2026-10-14T17:30:00-03:00",
+        "detalle": "Entregado en la puerta."
+      }
+    ]
+  },
+  {
+    "id": "ped-10533",
+    "numero": "SED-10533",
+    "usuarioId": "u-demo",
+    "correo": "demo@sedyjo.cl",
+    "fecha": "2026-10-29T09:10:00-03:00",
+    "estado": "en-camino",
+    "metodoEntrega": "despacho",
+    "direccion": {
+      "calle": "Los Aromos",
+      "numero": "1234",
+      "comuna": "San Pedro de la Paz",
+      "region": "Biobío",
+      "referencia": "Casa con reja verde"
+    },
+    "items": [
+      {
+        "productoId": "p-004",
+        "slug": "leche-entera-1-l",
+        "nombre": "Leche entera 1 L",
+        "precio": 1090,
+        "cantidad": 6,
+        "imagen": null,
+        "fondo": "#BFE0F7"
+      },
+      {
+        "productoId": "p-011",
+        "slug": "atun-en-agua-170-g",
+        "nombre": "Atún en agua 170 g",
+        "precio": 1390,
+        "cantidad": 2,
+        "imagen": null,
+        "fondo": "#F6E3A1"
+      },
+      {
+        "productoId": "p-022",
+        "slug": "cloro-1-l",
+        "nombre": "Cloro 1 L",
+        "precio": 1190,
+        "cantidad": 1,
+        "imagen": null,
+        "fondo": "#BFE8DF"
+      },
+      {
+        "productoId": "p-024",
+        "slug": "bolsas-de-basura-20-un",
+        "nombre": "Bolsas de basura 20 un.",
+        "precio": 1490,
+        "cantidad": 1,
+        "imagen": null,
+        "fondo": "#BFE8DF"
+      }
+    ],
+    "subtotal": 12000,
+    "despacho": 2490,
+    "total": 14490,
+    "metodoPago": "Webpay Plus (simulado)",
+    "eventos": [
+      {
+        "estado": "recibido",
+        "fecha": "2026-10-29T09:10:00-03:00",
+        "detalle": "Recibimos tu pedido y tu pago."
+      },
+      {
+        "estado": "preparando",
+        "fecha": "2026-10-29T10:30:00-03:00",
+        "detalle": "Estamos armando tu pedido."
+      },
+      {
+        "estado": "en-camino",
+        "fecha": "2026-10-29T15:45:00-03:00",
+        "detalle": "Salió a reparto. Llega hoy entre 16:00 y 19:00."
+      }
+    ]
+  },
+  {
+    "id": "ped-10541",
+    "numero": "SED-10541",
+    "usuarioId": "u-demo",
+    "correo": "demo@sedyjo.cl",
+    "fecha": "2026-11-01T12:00:00-03:00",
+    "estado": "preparando",
+    "metodoEntrega": "despacho",
+    "direccion": {
+      "calle": "Los Aromos",
+      "numero": "1234",
+      "comuna": "San Pedro de la Paz",
+      "region": "Biobío",
+      "referencia": "Casa con reja verde"
+    },
+    "items": [
+      {
+        "productoId": "p-014",
+        "slug": "chocolate-de-leche-100-g",
+        "nombre": "Chocolate de leche 100 g",
+        "precio": 1290,
+        "cantidad": 2,
+        "imagen": null,
+        "fondo": "#F8C9DA"
+      },
+      {
+        "productoId": "p-012",
+        "slug": "lentejas-500-g",
+        "nombre": "Lentejas 500 g",
+        "precio": 1290,
+        "cantidad": 1,
+        "imagen": null,
+        "fondo": "#F6E3A1"
+      },
+      {
+        "productoId": "p-013",
+        "slug": "te-negro-25-bolsitas",
+        "nombre": "Té negro 25 bolsitas",
+        "precio": 1190,
+        "cantidad": 1,
+        "imagen": null,
+        "fondo": "#F6E3A1"
+      },
+      {
+        "productoId": "p-025",
+        "slug": "jabon-de-tocador-3-un",
+        "nombre": "Jabón de tocador 3 un.",
+        "precio": 1990,
+        "cantidad": 1,
+        "imagen": null,
+        "fondo": "#E3D3F5"
+      }
+    ],
+    "subtotal": 7050,
+    "despacho": 0,
+    "total": 7050,
+    "metodoPago": "Webpay Plus (simulado)",
+    "eventos": [
+      {
+        "estado": "recibido",
+        "fecha": "2026-11-01T12:00:00-03:00",
+        "detalle": "Recibimos tu pedido y tu pago."
+      },
+      {
+        "estado": "preparando",
+        "fecha": "2026-11-01T12:40:00-03:00",
+        "detalle": "Estamos armando tu pedido para despacharlo."
+      }
+    ]
+  }
+]

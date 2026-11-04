@@ -1,0 +1,53 @@
+/*
+ * Paleta y tipografías de Comercial Sedyjo (ver sección 6 del documento de decisiones).
+ * Interfaz: blanco + verde suave, azul del logo en detalles.
+ * Dorado y morado neón: solo en banners secundarios de fondo negro.
+ */
+
+@theme {
+  /* Verdes */
+  --color-verde: #2e7d5b;
+  --color-verde-oscuro: #1f5c42;
+  --color-verde-profundo: #12372a;
+  --color-verde-suave: #e8f4ee;
+  --color-verde-claro: #9cc9b3;
+  --color-verde-menta: #7fd1a8;
+  --color-verde-palido: #cfe8db;
+
+  /* Azul del logo */
+  --color-azul: #1e4b8f;
+  --color-azul-oscuro: #16386d;
+
+  /* Descuentos (uso exclusivo) */
+  --color-rojo: #c73b3b;
+
+  /* Errores de formularios y avisos (6,5:1 sobre blanco) */
+  --color-error: #b42318;
+
+  /* Neutros */
+  --color-tinta: #1f2933;
+  --color-gris-fondo: #f3f5f4;
+  --color-gris-medio: #4b5563;
+  /* Gris de apoyo: ≥4,5:1 sobre blanco, gris-fondo y verde-suave.
+     Sobre los pasteles de producto usar gris-medio o tinta. */
+  --color-gris-texto: #566070;
+  --color-gris-claro: #b8bcc6;
+  --color-borde: #d9dee3;
+  /* Borde de campos y controles: 3:1 sobre blanco (WCAG 1.4.11). */
+  --color-borde-control: #8a949e;
+
+  /* Banners oscuros */
+  --color-oro: #ffc83d;
+  --color-morado: #d15bff;
+  --color-negro: #0b0b0f;
+  --color-carbon: #17171f;
+  --color-carbon-borde: #2a2a36;
+  --color-pie: #131319;
+
+  --container-sitio: 1240px;
+}
+
+@theme inline {
+  --font-titulos: var(--fuente-titulos), system-ui, sans-serif;
+  --font-texto: var(--fuente-texto), system-ui, sans-serif;
+}
