@@ -1,0 +1,31 @@
+{
+  "id": "camp-001",
+  "activo": false,
+  "tipo": "galeria",
+  "vigenciaHasta": "2026-12-31T23:59:59-03:00",
+  "frecuenciaHoras": 24,
+  "retrasoSegundos": 4,
+  "slides": [
+    {
+      "id": "s-1",
+      "imagen": "/images/productos/galletas.webp",
+      "titulo": "[Oferta especial de la semana]",
+      "texto": "[Descripción breve de la oferta para animar la compra.]",
+      "boton": { "texto": "Ver ofertas", "href": "/ofertas" }
+    },
+    {
+      "id": "s-2",
+      "imagen": "/images/productos/mayonesa.webp",
+      "titulo": "[Segunda oferta destacada]",
+      "texto": "[Texto de apoyo con el beneficio y las condiciones.]",
+      "boton": { "texto": "Ver ofertas", "href": "/ofertas" }
+    },
+    {
+      "id": "s-3",
+      "imagen": null,
+      "titulo": "[Tercera oferta destacada]",
+      "texto": "[Texto de apoyo. Aquí irá la foto cuando esté disponible.]",
+      "boton": { "texto": "Ver categorías", "href": "/categoria" }
+    }
+  ]
+}

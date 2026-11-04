@@ -1,0 +1,492 @@
+@import "tailwindcss";
+@import "./tokens.css";
+
+:root {
+  /* Desaceleración exponencial: llegadas seguras, sin rebote. */
+  --ease-salida: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    scrollbar-color: var(--color-verde-claro) transparent;
+    /* Evita el salto de ancho al bloquear el scroll con el carrito lateral abierto. */
+    scrollbar-gutter: stable;
+  }
+
+  body {
+    background: #ffffff;
+    color: var(--color-tinta);
+    font-family: var(--font-texto);
+  }
+
+  ::selection {
+    background: var(--color-verde-claro);
+    color: var(--color-verde-profundo);
+  }
+
+  a {
+    color: inherit;
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--color-azul);
+    outline-offset: 2px;
+  }
+}
+
+/* ---------- Interacción: subrayado que crece y foco sobre fondos oscuros ---------- */
+
+.enlace-sutil {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 0 1.5px;
+  transition: background-size 260ms var(--ease-salida);
+}
+
+.enlace-sutil:hover {
+  background-size: 100% 1.5px;
+}
+
+.sobre-oscuro :focus-visible {
+  outline-color: var(--color-oro);
+}
+
+/* Etiqueta de descuento con muesca, como una etiqueta de precio. */
+.etiqueta-precio {
+  clip-path: polygon(0 0, 100% 0, calc(100% - 7px) 50%, 100% 100%, 0 100%);
+  padding-right: 0.85rem;
+}
+
+/* ---------- Despacho gratis: el camión entra una sola vez ---------- */
+
+.camion-entra {
+  animation: camion-entra 700ms var(--ease-salida) 250ms both;
+}
+
+@keyframes camion-entra {
+  from {
+    opacity: 0;
+    transform: translateX(-36px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ---------- Carrusel: barra de progreso del banner activo ---------- */
+
+.progreso-banner {
+  transform-origin: left center;
+  animation: progreso-banner var(--duracion-banner, 7s) linear both;
+}
+
+@keyframes progreso-banner {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* ---------- Burbujas: motivo propio de Sedyjo (fondo, vuelo al carrito) ---------- */
+
+.burbuja,
+.burbuja-vuelo {
+  border-radius: 9999px;
+  background: radial-gradient(
+    circle at 30% 28%,
+    rgb(255 255 255 / 0.95),
+    rgb(127 209 168 / 0.34) 62%,
+    rgb(127 209 168 / 0.1)
+  );
+  border: 1px solid rgb(46 125 91 / 0.24);
+}
+
+.burbuja {
+  position: absolute;
+  bottom: -120px;
+  animation: burbuja var(--duracion, 24s) linear var(--retraso, 0s) infinite;
+  will-change: transform, opacity;
+}
+
+/* Con un panel o modal abierto el fondo queda tapado: no se anima. */
+:root:has(dialog[open]) .burbuja {
+  animation-play-state: paused;
+}
+
+[data-en-pantalla="false"] .doodles-capa {
+  animation-play-state: paused;
+}
+
+/* Sobre fondos oscuros la burbuja se vuelve dorada, como el anillo del logo. */
+.burbuja-vuelo {
+  position: fixed;
+  z-index: 60;
+  pointer-events: none;
+}
+
+.burbuja-vuelo[data-tema="oscuro"] {
+  background: radial-gradient(
+    circle at 30% 28%,
+    rgb(255 255 255 / 0.95),
+    rgb(255 200 61 / 0.7) 62%,
+    rgb(255 200 61 / 0.25)
+  );
+  border-color: rgb(255 200 61 / 0.6);
+}
+
+@keyframes burbuja {
+  0% {
+    transform: translate3d(0, 0, 0) scale(0.9);
+    opacity: 0;
+  }
+  12% {
+    opacity: 0.7;
+  }
+  100% {
+    transform: translate3d(var(--deriva, 20px), -115vh, 0) scale(1.15);
+    opacity: 0;
+  }
+}
+
+/* ---------- Carga: esqueletos con brillo ---------- */
+
+.esqueleto {
+  --brillo: rgb(255 255 255 / 0.7);
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.5rem;
+  background-color: var(--color-verde-suave);
+}
+
+.esqueleto::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(100deg, transparent 30%, var(--brillo) 50%, transparent 70%);
+  transform: translateX(-100%);
+  animation: brillo 1.4s linear infinite;
+}
+
+.esqueleto-oscuro {
+  --brillo: rgb(255 255 255 / 0.09);
+  background-color: var(--color-carbon-borde);
+}
+
+@keyframes brillo {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+/* ---------- Scroll: revelado de tarjetas y línea de títulos ---------- */
+/* El atributo lo pone JavaScript solo a lo que está bajo el primer pantallazo;
+   sin JavaScript todo queda visible. */
+
+[data-revelar] {
+  transition:
+    opacity 520ms var(--ease-salida),
+    transform 520ms var(--ease-salida);
+  transition-delay: calc(min(var(--i, 0), 7) * 60ms);
+}
+
+[data-revelar="oculto"] {
+  opacity: 0;
+  transform: translateY(24px);
+}
+
+.linea-titulo {
+  transform-origin: left center;
+  transition: transform 520ms var(--ease-salida) 120ms;
+}
+
+[data-revelar="oculto"] .linea-titulo {
+  transform: scaleX(0);
+}
+
+/* ---------- Fondo de garabatos del negocio (sección negra) ---------- */
+/* El mosaico mide 1000×800: la capa es un mosaico más grande que la sección y se desplaza
+   exactamente un mosaico, así el bucle no tiene saltos. */
+
+.doodles-capa {
+  --doodles-tam: 460px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: calc(100% + var(--doodles-tam));
+  height: calc(100% + var(--doodles-tam) * 0.8);
+  background-image: url("/patrones/doodles-comercio.svg");
+  background-size: var(--doodles-tam) calc(var(--doodles-tam) * 0.8);
+  background-repeat: repeat;
+  opacity: 0.2;
+  animation: doodles-deriva 120s linear infinite;
+  will-change: transform;
+}
+
+@media (min-width: 640px) {
+  .doodles-capa {
+    --doodles-tam: 640px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .doodles-capa {
+    --doodles-tam: 900px;
+  }
+}
+
+@keyframes doodles-deriva {
+  to {
+    transform: translate3d(calc(var(--doodles-tam) * -1), calc(var(--doodles-tam) * -0.8), 0);
+  }
+}
+
+/* ---------- Carga por lotes: entrada de los productos nuevos ---------- */
+
+.entrada-lote {
+  animation: entrada-lote 560ms var(--ease-salida) both;
+  animation-delay: calc(var(--i, 0) * 70ms);
+}
+
+@keyframes entrada-lote {
+  from {
+    opacity: 0;
+    transform: translateY(28px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---------- Agregar al carrito ---------- */
+
+.aparece {
+  animation: aparece 240ms var(--ease-salida) both;
+}
+
+@keyframes aparece {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ---------- Pasos del checkout, carrito lateral y celebración ---------- */
+
+.entrada-paso {
+  animation: entrada-paso 360ms var(--ease-salida) both;
+}
+
+@keyframes entrada-paso {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Los productos del carrito lateral entran uno tras otro cuando el panel termina de abrir. */
+dialog[data-visible="true"] .item-escalona {
+  animation: item-escalona 360ms var(--ease-salida) both;
+  animation-delay: calc(110ms + var(--i, 0) * 55ms);
+}
+
+@keyframes item-escalona {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Sacudida corta cuando un campo falla. */
+.sacudida {
+  animation: sacudida 280ms var(--ease-salida);
+}
+
+@keyframes sacudida {
+  20%,
+  60% {
+    transform: translateX(-6px);
+  }
+  40%,
+  80% {
+    transform: translateX(6px);
+  }
+}
+
+/* Confirmación de compra: el anillo crece, el check se dibuja y suben burbujas. */
+.exito-anillo {
+  transform-origin: center;
+  animation: exito-anillo 520ms var(--ease-salida) both;
+}
+
+@keyframes exito-anillo {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.exito-trazo {
+  stroke-dasharray: 32;
+  stroke-dashoffset: 32;
+  animation: exito-trazo 520ms var(--ease-salida) 260ms forwards;
+}
+
+@keyframes exito-trazo {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.exito-burbuja {
+  animation: exito-burbuja 1100ms var(--ease-salida) calc(300ms + var(--i, 0) * 90ms) both;
+}
+
+@keyframes exito-burbuja {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.5);
+  }
+  35% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-46px) scale(1);
+  }
+}
+
+/* Barra de pago simulado. */
+.progreso-pago {
+  transform-origin: left;
+  animation: progreso-pago 760ms cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@keyframes progreso-pago {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* Contenido real que reemplaza a un esqueleto: aparece con un fundido corto. */
+.contenido-entra {
+  animation: contenido-entra 260ms var(--ease-salida) both;
+}
+
+@keyframes contenido-entra {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Cifra que cambia (subtotal, total): breve destello hacia arriba. */
+.cifra-cambia {
+  animation: cifra-cambia 280ms var(--ease-salida) both;
+}
+
+@keyframes cifra-cambia {
+  from {
+    opacity: 0.35;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Producto que sale del carrito: se desliza y se desvanece antes de quitarse. */
+dialog[data-visible="true"] .item-sale {
+  animation: item-sale 200ms ease-in both;
+  animation-delay: 0ms;
+}
+
+@keyframes item-sale {
+  to {
+    opacity: 0;
+    transform: translateX(28px);
+  }
+}
+
+/* Hito actual de la línea de tiempo: onda suave que sale del punto. */
+.pulso-hito::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: 9999px;
+  border: 2px solid rgb(46 125 91 / 0.45);
+  animation: pulso-hito 1800ms ease-out infinite;
+}
+
+@keyframes pulso-hito {
+  from {
+    transform: scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: scale(1.7);
+    opacity: 0;
+  }
+}
+
+/* Transición entre páginas (View Transitions): sale rápido, entra con un deslizamiento corto. */
+::view-transition-old(.pagina) {
+  animation: 140ms ease-in both pagina-sale;
+}
+
+::view-transition-new(.pagina) {
+  animation: 300ms var(--ease-salida) 60ms both pagina-entra;
+}
+
+@keyframes pagina-sale {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes pagina-entra {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+/* Sin JavaScript las fotos no esperan al fundido. */
+@media (scripting: none) {
+  img[data-cargada] {
+    opacity: 1 !important;
+  }
+}

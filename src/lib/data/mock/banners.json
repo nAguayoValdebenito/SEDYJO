@@ -1,0 +1,48 @@
+{
+  "principales": [
+    {
+      "id": "b-001",
+      "etiqueta": "[ETIQUETA DE CAMPAÑA]",
+      "titulo": "[Título de la promoción]",
+      "texto": "[Texto breve de apoyo para el banner autoadministrable.]",
+      "boton": { "texto": "Ver ofertas", "href": "#ofertas" },
+      "imagen": null
+    },
+    {
+      "id": "b-002",
+      "etiqueta": "[ETIQUETA DE CAMPAÑA]",
+      "titulo": "[Segundo banner]",
+      "texto": "[Texto breve de apoyo para el banner autoadministrable.]",
+      "boton": { "texto": "Ver ofertas", "href": "#ofertas" },
+      "imagen": null
+    },
+    {
+      "id": "b-003",
+      "etiqueta": "[ETIQUETA DE CAMPAÑA]",
+      "titulo": "[Tercer banner]",
+      "texto": "[Texto breve de apoyo para el banner autoadministrable.]",
+      "boton": { "texto": "Ver ofertas", "href": "#ofertas" },
+      "imagen": null
+    }
+  ],
+  "oscuros": [
+    {
+      "id": "bo-001",
+      "insignia": "exclusivo online",
+      "titular": "[30%] dcto.",
+      "detalle": "[Producto o categoría en oferta]",
+      "imagen": "/images/productos/galletas.webp",
+      "alt": "Galletas",
+      "colorTitular": "dorado"
+    },
+    {
+      "id": "bo-002",
+      "insignia": "Sólo por pocos días",
+      "titular": "[3x $X.XXX]",
+      "detalle": "[Producto en oferta]",
+      "imagen": "/images/productos/mayonesa.webp",
+      "alt": "Mayonesa",
+      "colorTitular": "morado"
+    }
+  ]
+}
