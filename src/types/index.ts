@@ -43,6 +43,25 @@ export type Producto = {
   promo: string | null;
 };
 
+/** Oferta del día para el panel de ingreso: el producto con mayor descuento y los datos de la oferta. */
+export type OfertaDelDia = {
+  producto: Producto;
+  titulo: string;
+  descripcion: string | null;
+  /** Imagen de la oferta (520×288 px); si falta se usa la foto del producto. */
+  imagen: string | null;
+  /** Fecha de término (ISO 8601); `null` si no vence. */
+  terminaEn: string | null;
+};
+
+/** Oferta vigente con sus productos, para la franja destacada de la portada. */
+export type OfertaDestacada = {
+  titulo: string;
+  descripcion: string | null;
+  terminaEn: string | null;
+  productos: Producto[];
+};
+
 export type Coleccion = "semana" | "exclusivo-online";
 
 export type Banner = {
@@ -146,6 +165,23 @@ export type Direccion = {
   referencia: string | null;
 };
 
+/**
+ * Dirección tal como la entrega la API en un pedido. En el seguimiento público la calle, el
+ * número y la referencia vienen en `null` (solo se muestran la comuna y la región).
+ */
+export type DireccionPedido = {
+  calle: string | null;
+  numero: string | null;
+  comuna: string;
+  region: string;
+  referencia: string | null;
+};
+
+/** Estado del pago de un pedido. */
+export type EstadoPago = "pendiente" | "pagado" | "rechazado" | "expirado";
+
+export type PagoPedido = { estado: EstadoPago; fecha: string | null };
+
 /** Producto tal como se compró: precio y datos congelados al momento de la compra. */
 export type ItemPedido = {
   productoId: string;
@@ -173,13 +209,14 @@ export type Pedido = {
   id: string;
   /** Número visible para el cliente (ej. SED-10482). */
   numero: string;
-  usuarioId: string;
+  /** `null` en pedidos de invitados. */
+  usuarioId: string | null;
+  /** Vacío en el seguimiento público (la API no lo devuelve). */
   correo: string;
   fecha: string;
   estado: EstadoPedido;
   metodoEntrega: MetodoEntrega;
-  /** `null` cuando se retira en tienda. */
-  direccion: Direccion | null;
+  direccion: DireccionPedido | null;
   items: ItemPedido[];
   subtotal: number;
   /** `null` cuando el costo de despacho sigue pendiente. */
@@ -187,12 +224,69 @@ export type Pedido = {
   /** `null` hasta confirmar el costo de despacho. */
   total: number | null;
   metodoPago: string;
+  /** Estado del pago según la API (los pedidos de ejemplo no lo traen). */
+  pago?: PagoPedido | null;
   eventos: EventoEnvio[];
+};
+
+/** Comuna con despacho, con su costo y plazo. */
+export type ZonaDespacho = {
+  id: number;
+  region: string;
+  comuna: string;
+  costo: number;
+  plazo: string;
+};
+
+/** Reglas de despacho vigentes (`GET /shipping`). */
+export type Despacho = {
+  gratisDesde: number | null;
+  /** Costo general fuera de las zonas; hoy solo se despacha a las zonas. */
+  costoGeneral: number | null;
+  plazo: string;
+  zonas: ZonaDespacho[];
+};
+
+export type ProblemaCotizacion = {
+  productoId: string;
+  codigo: "sin_stock" | "cantidad_excede" | "no_existe";
+  disponible: number | null;
+};
+
+export type ItemCotizado = {
+  productoId: string;
+  slug: string;
+  nombre: string;
+  precio: number;
+  precioNormal: number;
+  cantidad: number;
+  subtotal: number;
+  stock: number;
+  imagen: string | null;
+};
+
+/** Cotización de la compra (`POST /checkout/quote`): precios, despacho y total los calcula la API. */
+export type Cotizacion = {
+  items: ItemCotizado[];
+  subtotal: number;
+  /** `null` si no hay cobertura o no hay costo definido. */
+  despacho: number | null;
+  total: number | null;
+  plazo: string;
+  gratisDesde: number | null;
+  faltaParaGratis: number;
+  cobertura: boolean;
+  cotizable: boolean;
+  valido: boolean;
+  problemas: ProblemaCotizacion[];
 };
 
 export type ResultadoPago =
   | { ok: true; pedido: Pedido }
-  | { ok: false; motivo: "rechazado" | "cancelado" | "tiempo-agotado" | "invalido" };
+  | {
+      ok: false;
+      motivo: "rechazado" | "cancelado" | "tiempo-agotado" | "invalido" | "no-disponible";
+    };
 
 /** Resultado de las operaciones de cuenta. El backend real devolverá esta misma forma. */
 export type ResultadoAuth =
@@ -200,7 +294,7 @@ export type ResultadoAuth =
   | {
       ok: false;
       error: {
-        codigo: "credenciales" | "validacion" | "servidor";
+        codigo: "credenciales" | "validacion" | "servidor" | "sesion";
         mensaje: string;
         /** Errores por campo (clave = nombre del campo). */
         campos?: Record<string, string>;
@@ -222,7 +316,7 @@ export type ResultadoOperacion<T> =
   | {
       ok: false;
       error: {
-        codigo: "credenciales" | "validacion" | "servidor";
+        codigo: "credenciales" | "validacion" | "servidor" | "sesion";
         mensaje: string;
         /** Errores por campo (clave = nombre del campo). */
         campos?: Record<string, string>;

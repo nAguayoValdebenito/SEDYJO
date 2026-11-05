@@ -3,12 +3,13 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { CampoTexto } from "@/components/ui/CampoTexto";
+import { CampoComuna } from "@/features/despacho/components/CampoComuna";
 import { ResumenErrores } from "@/components/ui/ResumenErrores";
 import { claseBoton } from "@/components/ui/boton";
 import { erroresPorCampo } from "@/lib/validation/auth";
 import { direccionSchema } from "@/lib/validation/cuenta";
 import type { EntradaDireccionLibreta } from "@/lib/utils/direcciones";
-import type { DireccionGuardada } from "@/types";
+import type { DireccionGuardada, ZonaDespacho } from "@/types";
 import { validarDireccion } from "../acciones";
 
 const ETIQUETAS = {
@@ -21,16 +22,33 @@ const ETIQUETAS = {
 };
 
 type Props = {
+  /** Comunas con despacho: la comuna se elige de esta lista. */
+  zonas: ZonaDespacho[];
   /** Dirección que se edita; sin ella el formulario agrega una nueva. */
   inicial?: DireccionGuardada;
   /** Muestra la opción "usar como principal" (al agregar, si ya hay otras). */
   ofrecerPrincipal?: boolean;
-  onGuardar: (entrada: EntradaDireccionLibreta, principal: boolean) => void;
+  /** Guarda la dirección; devuelve el mensaje de error del servidor o `null` si salió bien. */
+  onGuardar: (
+    entrada: EntradaDireccionLibreta,
+    principal: boolean,
+  ) => Promise<string | null> | string | null | void;
   onCancelar: () => void;
 };
 
 /** Formulario para agregar o editar una dirección de la libreta. */
-export function FormularioDireccion({ inicial, ofrecerPrincipal, onGuardar, onCancelar }: Props) {
+export function FormularioDireccion({
+  zonas,
+  inicial,
+  ofrecerPrincipal,
+  onGuardar,
+  onCancelar,
+}: Props) {
+  // Una dirección guardada con una comuna que ya no tiene despacho obliga a elegir otra.
+  const zonaInicial = zonas.find((z) => z.comuna === inicial?.comuna);
+  const [comuna, setComuna] = useState(zonaInicial?.comuna ?? "");
+  const [region, setRegion] = useState(zonaInicial?.region ?? "");
+  const comunaSinDespacho = Boolean(inicial) && !zonaInicial;
   const [errores, setErrores] = useState<Record<string, string>>({});
   const [errorGeneral, setErrorGeneral] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
@@ -58,7 +76,10 @@ export function FormularioDireccion({ inicial, ofrecerPrincipal, onGuardar, onCa
 
     const validacion = direccionSchema.safeParse(entrada);
     if (!validacion.success) {
-      setErrores(erroresPorCampo(validacion.error));
+      const campos = erroresPorCampo(validacion.error);
+      // Sin comuna tampoco hay región: se avisa solo de la comuna.
+      if (campos.comuna) delete campos.region;
+      setErrores(campos);
       setErrorGeneral(null);
       setIntento((n) => n + 1);
       return;
@@ -71,7 +92,14 @@ export function FormularioDireccion({ inicial, ofrecerPrincipal, onGuardar, onCa
       const resultado = await validarDireccion(entrada);
       if (resultado.ok) {
         const { referencia, ...resto } = resultado.datos;
-        onGuardar({ ...resto, referencia: referencia || null }, principal);
+        const errorServidor = await onGuardar(
+          { ...resto, referencia: referencia || null },
+          principal,
+        );
+        if (errorServidor) {
+          setErrorGeneral(errorServidor);
+          setIntento((n) => n + 1);
+        }
         return;
       }
       setErrores(resultado.error.campos ?? {});
@@ -119,9 +147,8 @@ export function FormularioDireccion({ inicial, ofrecerPrincipal, onGuardar, onCa
       <CampoTexto
         id="dir-etiqueta"
         name="etiqueta"
-        etiqueta="Nombre de la dirección"
+        etiqueta="Nombre de la dirección (ejemplo: Casa o Trabajo)"
         defaultValue={inicial?.etiqueta ?? ""}
-        placeholder="Casa, Trabajo…"
         required
         error={errores.etiqueta}
       />
@@ -145,23 +172,23 @@ export function FormularioDireccion({ inicial, ofrecerPrincipal, onGuardar, onCa
         />
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
-        <CampoTexto
-          id="dir-comuna"
-          name="comuna"
-          etiqueta="Comuna"
-          defaultValue={inicial?.comuna ?? ""}
-          autoComplete="address-level2"
-          required
+        <CampoComuna
+          prefijo="dir"
+          zonas={zonas}
+          comuna={comuna}
+          region={region}
+          onElegir={(nuevaComuna, nuevaRegion) => {
+            setComuna(nuevaComuna);
+            setRegion(nuevaRegion);
+          }}
           error={errores.comuna}
-        />
-        <CampoTexto
-          id="dir-region"
-          name="region"
-          etiqueta="Región"
-          defaultValue={inicial?.region ?? ""}
-          autoComplete="address-level1"
-          required
-          error={errores.region}
+          ayuda={
+            comunaSinDespacho
+              ? "Esa comuna ya no tiene despacho. Elige una de la lista."
+              : zonas.length === 0
+                ? "No pudimos cargar las comunas con despacho. Recarga la página."
+                : undefined
+          }
         />
       </div>
       <CampoTexto

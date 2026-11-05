@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { BurbujasDecorativas } from "./BurbujasDecorativas";
+import { FondoDoodlesComercio } from "./FondoDoodlesComercio";
 import { Contenedor } from "./Contenedor";
 import { EncabezadoSeccion } from "./EncabezadoSeccion";
 
@@ -28,6 +29,7 @@ export function TarjetaFormulario({ titulo, descripcion, aviso, lateral, childre
               aria-label="Oferta del día y beneficios"
               className="sobre-oscuro relative hidden overflow-hidden rounded-2xl bg-verde-oscuro p-9 text-white lg:block"
             >
+              <FondoDoodlesComercio tono="verde" tam={420} />
               <BurbujasDecorativas />
               {lateral}
             </aside>

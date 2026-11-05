@@ -23,7 +23,10 @@ export const checkoutSchema = z
         contexto.addIssue({
           code: "custom",
           path: [campo],
-          message: `Escribe ${campo === "numero" ? "el número" : campo === "region" ? "la región" : `la ${campo}`}.`,
+          message:
+            campo === "comuna"
+              ? "Elige tu comuna."
+              : `Escribe ${campo === "numero" ? "el número" : campo === "region" ? "la región" : `la ${campo}`}.`,
         });
       }
     }

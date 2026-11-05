@@ -2,8 +2,9 @@ import { cacheLife } from "next/cache";
 import { coincideBusqueda } from "@/lib/utils/busqueda";
 import { seleccionarRelacionados } from "@/lib/utils/producto";
 import { seleccionarRecomendaciones } from "@/lib/utils/recomendaciones";
-import type { Coleccion, Producto } from "@/types";
-import { obtenerCatalogo } from "./catalogo-api";
+import type { Coleccion, OfertaDelDia, OfertaDestacada, Producto } from "@/types";
+import { adaptarOfertaDelDia, adaptarOfertaDestacada } from "./adaptador-api";
+import { obtenerCatalogo, obtenerOfertaDelDia, obtenerOfertas } from "./catalogo-api";
 
 /**
  * Acceso a datos de productos.
@@ -66,21 +67,24 @@ export async function getProductBySlug(slug: string): Promise<Producto | null> {
 }
 
 /**
- * Oferta del día: el producto con stock y mayor descuento. Hoy se calcula sobre los datos
- * simulados; con el backend podrá definirla el administrador.
+ * Oferta del día para el panel de ingreso (`GET /offers/daily`): su producto con mayor descuento
+ * y la imagen de la oferta. `null` si hoy no hay ninguna.
  */
-export async function getOfertaDelDia(): Promise<Producto | null> {
+export async function getOfertaDelDia(): Promise<OfertaDelDia | null> {
   "use cache";
-  cacheLife("hours");
+  cacheLife("minutes");
 
-  const productos = await obtenerCatalogo();
-  const conDescuento = productos.filter(
-    (p) => p.stock > 0 && p.precioAnterior !== null && p.precioAnterior > p.precio,
-  );
-  conDescuento.sort(
-    (a, b) => 1 - b.precio / (b.precioAnterior ?? 1) - (1 - a.precio / (a.precioAnterior ?? 1)),
-  );
-  return conDescuento[0] ?? null;
+  const [oferta, catalogo] = await Promise.all([obtenerOfertaDelDia(), obtenerCatalogo()]);
+  return adaptarOfertaDelDia(oferta, catalogo);
+}
+
+/** Oferta vigente para la franja oscura de la portada (`GET /offers`), con hasta 4 productos. */
+export async function getOfertaDestacada(): Promise<OfertaDestacada | null> {
+  "use cache";
+  cacheLife("minutes");
+
+  const [ofertas, catalogo] = await Promise.all([obtenerOfertas(), obtenerCatalogo()]);
+  return adaptarOfertaDestacada(ofertas, catalogo);
 }
 
 /** Productos relacionados con uno dado (misma categoría primero). */

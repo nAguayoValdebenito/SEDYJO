@@ -1,13 +1,22 @@
 import { z } from "zod";
 import { formatoPrecio } from "@/lib/utils/format";
-import type { Banner, BannerOscuro, CampanaModal, Categoria, Coleccion, Producto } from "@/types";
+import type {
+  Banner,
+  BannerOscuro,
+  CampanaModal,
+  Categoria,
+  Coleccion,
+  OfertaDelDia,
+  OfertaDestacada,
+  Producto,
+} from "@/types";
 
 /**
  * Traduce lo que entrega la API de Sedyjo (`/api/v1`) a los contratos del frontend.
  * Son funciones puras (sin red) para poder probarlas.
  *
- * La API no entrega todavía: slug, precio anterior, ofertas ni colecciones del inicio. Esos
- * datos se derivan aquí o quedan vacíos hasta que el backend los incorpore.
+ * La API entrega slug estable, precio de oferta y ofertas vigentes. Lo que aún no entrega (la
+ * selección de destacados del inicio, la unidad de venta) se deriva aquí o queda vacío.
  */
 
 export const productoApiSchema = z.object({
@@ -19,6 +28,11 @@ export const productoApiSchema = z.object({
   price: z.number().int().nonnegative(),
   stock: z.number().int().nonnegative(),
   image: z.string().nullable().optional(),
+  /** Estable: no cambia si se renombra el producto. */
+  slug: z.string().nullish(),
+  /** Precio a cobrar si hay una oferta vigente; `price` es siempre el precio normal. */
+  offerPrice: z.number().int().nonnegative().nullish(),
+  discountPercent: z.number().nullish(),
 });
 
 export const respuestaProductosSchema = z.object({
@@ -120,52 +134,59 @@ export function precioPorUnidad(precio: number, unidad: string): string {
 }
 
 /**
- * Reparte las colecciones del inicio entre categorías distintas (una de cada una por vuelta).
- * Es provisorio: cuando el backend permita marcar destacados, se reemplaza por ese dato.
+ * "Semana" de la portada: primero los productos con oferta vigente (mayor descuento primero).
+ * Sin ofertas, reparte entre categorías distintas (una de cada una por vuelta) como respaldo.
+ * La franja oscura "exclusivo online" ya no sale de aquí: usa una oferta de la API.
  */
 export function repartirColecciones(productos: ProductoApi[]): Map<number, Coleccion[]> {
-  const porCategoria = new Map<string, ProductoApi[]>();
-  for (const p of productos.filter((p) => p.stock > 0 && p.image)) {
-    const lista = porCategoria.get(p.category) ?? [];
-    lista.push(p);
-    porCategoria.set(p.category, lista);
-  }
-  const grupos = [...porCategoria.entries()].sort(([a], [b]) => a.localeCompare(b, "es"));
+  const disponibles = productos.filter((p) => p.stock > 0 && p.image);
+  const enOferta = disponibles
+    .filter((p) => p.offerPrice != null && p.offerPrice < p.price)
+    .sort((a, b) => (b.discountPercent ?? 0) - (a.discountPercent ?? 0));
 
-  const intercalados: ProductoApi[] = [];
-  for (let ronda = 0; intercalados.length < productos.length; ronda++) {
-    let agregado = false;
-    for (const [, lista] of grupos) {
-      if (lista[ronda]) {
-        intercalados.push(lista[ronda]);
-        agregado = true;
-      }
+  let elegidos: ProductoApi[] = enOferta;
+  if (elegidos.length === 0) {
+    const porCategoria = new Map<string, ProductoApi[]>();
+    for (const p of disponibles) {
+      const lista = porCategoria.get(p.category) ?? [];
+      lista.push(p);
+      porCategoria.set(p.category, lista);
     }
-    if (!agregado) break;
+    const grupos = [...porCategoria.entries()].sort(([a], [b]) => a.localeCompare(b, "es"));
+    elegidos = [];
+    for (let ronda = 0; elegidos.length < disponibles.length; ronda++) {
+      let agregado = false;
+      for (const [, lista] of grupos) {
+        if (lista[ronda]) {
+          elegidos.push(lista[ronda]);
+          agregado = true;
+        }
+      }
+      if (!agregado) break;
+    }
   }
 
   const colecciones = new Map<number, Coleccion[]>();
-  intercalados.slice(0, 10).forEach((p) => colecciones.set(p.id, ["semana"]));
-  intercalados.slice(-4).forEach((p) => {
-    colecciones.set(p.id, [...(colecciones.get(p.id) ?? []), "exclusivo-online"]);
-  });
+  elegidos.slice(0, 10).forEach((p) => colecciones.set(p.id, ["semana"]));
   return colecciones;
 }
 
 export function adaptarProducto(p: ProductoApi, colecciones: Coleccion[] = []): Producto {
   const categoriaSlug = generarSlug(p.category);
   const { marca, unidad } = separarMarcaYUnidad(p.description);
+  // La API calcula el precio de oferta; el frontend solo lo muestra.
+  const enOferta = p.offerPrice != null && p.offerPrice < p.price;
   return {
     id: String(p.id),
-    slug: generarSlug(p.name),
+    slug: p.slug || generarSlug(p.name),
     nombre: p.name,
     descripcionCorta: p.description ?? "",
     categoriaSlug,
     etiqueta: p.category,
-    precio: p.price,
-    precioAnterior: null,
+    precio: enOferta ? (p.offerPrice as number) : p.price,
+    precioAnterior: enOferta ? p.price : null,
     unidad,
-    precioPorUnidad: precioPorUnidad(p.price, unidad),
+    precioPorUnidad: precioPorUnidad(enOferta ? (p.offerPrice as number) : p.price, unidad),
     stock: p.stock,
     imagenes: p.image ? [p.image] : [],
     marca,
@@ -283,4 +304,70 @@ export function adaptarCampanaModal(banners: BannerApi[]): CampanaModal | null {
     retrasoSegundos: RETRASO_MODAL_SEGUNDOS,
     slides,
   };
+}
+
+export const ofertaApiSchema = z.object({
+  id: z.number().int(),
+  title: z.string(),
+  description: z.string().nullish(),
+  image: z.string().nullish(),
+  isDaily: z.boolean().optional(),
+  position: z.number().optional(),
+  endsAt: z.string().nullish(),
+  products: z.array(z.object({ id: z.number().int() })).optional(),
+});
+
+export type OfertaApi = z.infer<typeof ofertaApiSchema>;
+
+const descuentoDe = (p: Producto) =>
+  p.precioAnterior ? (p.precioAnterior - p.precio) / p.precioAnterior : 0;
+
+/** El producto con stock y mayor descuento entre los de la oferta. */
+function mejorProducto(oferta: OfertaApi, catalogo: Producto[]): Producto | null {
+  const ids = new Set((oferta.products ?? []).map((p) => String(p.id)));
+  return (
+    catalogo
+      .filter((p) => ids.has(p.id) && p.stock > 0)
+      .sort((a, b) => descuentoDe(b) - descuentoDe(a))[0] ?? null
+  );
+}
+
+export function adaptarOfertaDelDia(
+  oferta: OfertaApi | null,
+  catalogo: Producto[],
+): OfertaDelDia | null {
+  if (!oferta) return null;
+  const producto = mejorProducto(oferta, catalogo);
+  if (!producto) return null;
+  return {
+    producto,
+    titulo: oferta.title,
+    descripcion: oferta.description ?? null,
+    imagen: oferta.image ?? null,
+    terminaEn: oferta.endsAt ?? null,
+  };
+}
+
+/** La primera oferta vigente que no es la del día y tiene productos con stock (hasta 4). */
+export function adaptarOfertaDestacada(
+  ofertas: OfertaApi[],
+  catalogo: Producto[],
+): OfertaDestacada | null {
+  for (const oferta of [...ofertas].sort((a, b) => (a.position ?? 0) - (b.position ?? 0))) {
+    if (oferta.isDaily) continue;
+    const ids = new Set((oferta.products ?? []).map((p) => String(p.id)));
+    const productos = catalogo
+      .filter((p) => ids.has(p.id) && p.stock > 0)
+      .sort((a, b) => descuentoDe(b) - descuentoDe(a))
+      .slice(0, 4);
+    if (productos.length > 0) {
+      return {
+        titulo: oferta.title,
+        descripcion: oferta.description ?? null,
+        terminaEn: oferta.endsAt ?? null,
+        productos,
+      };
+    }
+  }
+  return null;
 }

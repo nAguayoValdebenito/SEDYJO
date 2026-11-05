@@ -5,12 +5,13 @@ import { AlertCircle, CircleCheck, Loader2 } from "lucide-react";
 import { CampoTexto } from "@/components/ui/CampoTexto";
 import { ResumenErrores } from "@/components/ui/ResumenErrores";
 import { claseBoton } from "@/components/ui/boton";
+import { CampoContrasena } from "@/features/auth/components/CampoContrasena";
 import { useSesion } from "@/features/auth/store";
 import { erroresPorCampo } from "@/lib/validation/auth";
 import { perfilSchema } from "@/lib/validation/cuenta";
 import { actualizarPerfil } from "../acciones";
 
-const ETIQUETAS = { nombre: "Nombre", correo: "Correo" };
+const ETIQUETAS = { nombre: "Nombre", correo: "Correo", contrasena: "Contraseña actual" };
 
 /** Edita el nombre y el correo de la cuenta (validación en el navegador y en el servidor). */
 export function FormularioPerfil() {
@@ -21,6 +22,7 @@ export function FormularioPerfil() {
   const [errorGeneral, setErrorGeneral] = useState<string | null>(null);
   const [guardado, setGuardado] = useState(false);
   const [enviando, setEnviando] = useState(false);
+  const [correoEscrito, setCorreoEscrito] = useState<string | null>(null);
   const [intento, setIntento] = useState(0);
   const resumen = useRef<HTMLDivElement>(null);
   const alerta = useRef<HTMLDivElement>(null);
@@ -32,12 +34,16 @@ export function FormularioPerfil() {
 
   if (!usuario) return null;
 
+  const cambiaElCorreo =
+    correoEscrito !== null && correoEscrito.trim().toLowerCase() !== usuario.correo.toLowerCase();
+
   const enviar = async (evento: FormEvent<HTMLFormElement>) => {
     evento.preventDefault();
     const datos = new FormData(evento.currentTarget);
     const entrada = {
       nombre: String(datos.get("nombre") ?? ""),
       correo: String(datos.get("correo") ?? ""),
+      contrasena: String(datos.get("contrasena") ?? ""),
     };
     setGuardado(false);
 
@@ -53,12 +59,14 @@ export function FormularioPerfil() {
     setErrorGeneral(null);
     setEnviando(true);
     try {
-      const resultado = await actualizarPerfil(entrada, { id: usuario.id, correo: usuario.correo });
+      const resultado = await actualizarPerfil(entrada);
       if (resultado.ok) {
         actualizarUsuario(resultado.datos);
+        setCorreoEscrito(null);
         setGuardado(true);
         return;
       }
+      if (resultado.error.codigo === "sesion") useSesion.getState().olvidarUsuario();
       setErrores(resultado.error.campos ?? {});
       setErrorGeneral(resultado.error.campos ? null : resultado.error.mensaje);
       setIntento((n) => n + 1);
@@ -73,6 +81,7 @@ export function FormularioPerfil() {
   return (
     <form
       key={`${usuario.nombre}|${usuario.correo}`}
+      method="post"
       onSubmit={enviar}
       noValidate
       aria-busy={enviando}
@@ -111,7 +120,19 @@ export function FormularioPerfil() {
         inputMode="email"
         required
         error={errores.correo}
+        onChange={(e) => setCorreoEscrito(e.target.value)}
       />
+      {cambiaElCorreo && (
+        <CampoContrasena
+          id="perfil-contrasena"
+          name="contrasena"
+          etiqueta="Contraseña actual"
+          autoComplete="current-password"
+          ayuda="Por seguridad, para cambiar el correo escribe tu contraseña actual."
+          required
+          error={errores.contrasena}
+        />
+      )}
 
       <div className="flex flex-wrap items-center gap-4">
         <button type="submit" disabled={enviando} className={claseBoton("primario", "lg")}>

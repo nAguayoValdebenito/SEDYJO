@@ -7,6 +7,7 @@ import { defineConfig } from "@playwright/test";
  * `npx playwright install chromium`).
  */
 const PUERTO = 3100;
+const PUERTO_API = 3199;
 const canal = process.env.E2E_CANAL ?? "chrome";
 
 export default defineConfig({
@@ -25,10 +26,21 @@ export default defineConfig({
     screenshot: "only-on-failure",
     ...(canal === "chromium" ? {} : { channel: canal }),
   },
-  webServer: {
-    command: `npm start -- -p ${PUERTO}`,
-    url: `http://localhost:${PUERTO}`,
-    reuseExistingServer: true,
-    timeout: 60_000,
-  },
+  webServer: [
+    {
+      // API de Sedyjo falsa: los pedidos de las pruebas no tocan la API real (ver e2e/api-falsa.mjs).
+      command: `node e2e/api-falsa.mjs`,
+      url: `http://localhost:${PUERTO_API}/health`,
+      reuseExistingServer: true,
+      timeout: 30_000,
+      env: { API_FALSA_PUERTO: String(PUERTO_API) },
+    },
+    {
+      command: `npm start -- -p ${PUERTO}`,
+      url: `http://localhost:${PUERTO}`,
+      reuseExistingServer: true,
+      timeout: 60_000,
+      env: { SEDYJO_API_URL: `http://localhost:${PUERTO_API}` },
+    },
+  ],
 });

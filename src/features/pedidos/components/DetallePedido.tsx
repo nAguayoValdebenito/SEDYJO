@@ -7,7 +7,6 @@ import { Esqueleto } from "@/components/ui/Esqueleto";
 import { claseBoton } from "@/components/ui/boton";
 import { useSesion } from "@/features/auth/store";
 import type { Pedido } from "@/types";
-import { useCheckout } from "@/features/checkout/store";
 import { obtenerPedido } from "../acciones";
 import { ErrorCarga } from "./EstadosCarga";
 import { VistaPedido } from "./VistaPedido";
@@ -20,7 +19,6 @@ type Estado =
 /** `/cuenta/pedidos/[id]`: detalle de un pedido del cliente, con carga, no encontrado y error. */
 export function DetallePedido({ id }: { id: string }) {
   const usuario = useSesion((s) => s.usuario);
-  const pedidoReciente = useCheckout((s) => s.pedidoReciente);
   const usuarioId = usuario?.id ?? null;
   const [estado, setEstado] = useState<Estado | null>(null);
   const [intento, setIntento] = useState(0);
@@ -29,7 +27,7 @@ export function DetallePedido({ id }: { id: string }) {
   useEffect(() => {
     if (!usuarioId) return;
     let cancelado = false;
-    obtenerPedido(id, usuarioId)
+    obtenerPedido(id)
       .then((pedido) => {
         if (cancelado) return;
         setEstado(pedido ? { clave, tipo: "listo", pedido } : { clave, tipo: "no-existe" });
@@ -42,12 +40,7 @@ export function DetallePedido({ id }: { id: string }) {
     };
   }, [id, usuarioId, clave]);
 
-  const actual: Estado | null =
-    pedidoReciente?.id === id && pedidoReciente.usuarioId === usuarioId
-      ? { clave, tipo: "listo", pedido: pedidoReciente }
-      : estado && estado.clave === clave
-        ? estado
-        : null;
+  const actual: Estado | null = estado && estado.clave === clave ? estado : null;
 
   return (
     <>

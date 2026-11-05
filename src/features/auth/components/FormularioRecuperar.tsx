@@ -36,11 +36,9 @@ export function FormularioRecuperar() {
           />
           <span>
             Si <strong>{enviadoA}</strong> tiene una cuenta, te enviaremos las instrucciones para
-            crear una contraseña nueva. Revisa también tu carpeta de spam.
+            crear una contraseña nueva. El enlace vale 60 minutos. Revisa también tu carpeta de
+            spam.
           </span>
-        </p>
-        <p className="text-sm text-gris-texto">
-          Modo demostración: no se envía ningún correo real.
         </p>
         <Link href="/ingresar" className={claseBoton("primario", "lg", "self-start")}>
           Volver a iniciar sesión

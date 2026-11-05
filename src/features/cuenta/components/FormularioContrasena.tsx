@@ -7,6 +7,7 @@ import { claseBoton } from "@/components/ui/boton";
 import { CampoContrasena } from "@/features/auth/components/CampoContrasena";
 import { erroresPorCampo } from "@/lib/validation/auth";
 import { contrasenaSchema } from "@/lib/validation/cuenta";
+import { useSesion } from "@/features/auth/store";
 import { cambiarContrasena } from "../acciones";
 
 const ETIQUETAS = {
@@ -59,6 +60,7 @@ export function FormularioContrasena() {
         setCambiada(true);
         return;
       }
+      if (resultado.error.codigo === "sesion") useSesion.getState().olvidarUsuario();
       setErrores(resultado.error.campos ?? {});
       setErrorGeneral(resultado.error.campos ? null : resultado.error.mensaje);
       setIntento((n) => n + 1);
@@ -72,6 +74,7 @@ export function FormularioContrasena() {
 
   return (
     <form
+      method="post"
       onSubmit={enviar}
       noValidate
       aria-busy={enviando}

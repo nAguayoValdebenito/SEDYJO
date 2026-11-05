@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { ordenarPedidos } from "@/lib/utils/pedidos";
 import type { Pedido } from "@/types";
-import { useCheckout } from "@/features/checkout/store";
 import { obtenerPedidos } from "./acciones";
 
 type Resultado = { usuarioId: string; pedidos: Pedido[] } | { usuarioId: string; error: true };
@@ -13,9 +12,8 @@ export type EstadoPedidos =
   | { estado: "error"; reintentar: () => void }
   | { estado: "listo"; pedidos: Pedido[] };
 
-/** Carga los pedidos del cliente (con estados de carga y error). Hoy vienen de la API simulada. */
+/** Carga los pedidos del cliente (con estados de carga y error). Vienen de la API de Sedyjo (`/me/orders`). */
 export function usePedidos(usuarioId: string | null): EstadoPedidos {
-  const pedidoReciente = useCheckout((s) => s.pedidoReciente);
   const [resultado, setResultado] = useState<Resultado | null>(null);
   const [intento, setIntento] = useState(0);
 
@@ -23,7 +21,7 @@ export function usePedidos(usuarioId: string | null): EstadoPedidos {
     if (!usuarioId) return;
     let cancelado = false;
 
-    obtenerPedidos(usuarioId)
+    obtenerPedidos()
       .then((pedidos) => {
         if (!cancelado) setResultado({ usuarioId, pedidos: ordenarPedidos(pedidos) });
       })
@@ -49,9 +47,6 @@ export function usePedidos(usuarioId: string | null): EstadoPedidos {
   }
   return {
     estado: "listo",
-    pedidos: ordenarPedidos([
-      ...(pedidoReciente?.usuarioId === usuarioId ? [pedidoReciente] : []),
-      ...actual.pedidos,
-    ]),
+    pedidos: actual.pedidos,
   };
 }

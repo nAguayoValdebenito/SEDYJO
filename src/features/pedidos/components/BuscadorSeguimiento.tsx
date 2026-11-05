@@ -6,10 +6,8 @@ import { Loader2, SearchX } from "lucide-react";
 import { CampoTexto } from "@/components/ui/CampoTexto";
 import { ResumenErrores } from "@/components/ui/ResumenErrores";
 import { claseBoton } from "@/components/ui/boton";
-import { AvisoModoDemostracion } from "@/features/auth/components/AvisoModoDemostracion";
 import { erroresPorCampo, seguimientoSchema } from "@/lib/validation/auth";
 import type { Pedido } from "@/types";
-import { useCheckout } from "@/features/checkout/store";
 import { buscarPedidoPublico } from "../acciones";
 import { VistaPedido } from "./VistaPedido";
 
@@ -19,7 +17,6 @@ const ETIQUETAS = { numero: "Número de pedido", correo: "Correo electrónico" }
 
 /** `/seguimiento`: consulta sin cuenta con número de pedido y correo. `?pedido=` rellena el número. */
 export function BuscadorSeguimiento() {
-  const pedidoReciente = useCheckout((s) => s.pedidoReciente);
   const params = useSearchParams();
   const [numero, setNumero] = useState(params.get("pedido") ?? "");
   const [correo, setCorreo] = useState("");
@@ -41,11 +38,7 @@ export function BuscadorSeguimiento() {
     setErrores({});
     setCargando(true);
     try {
-      const pedido =
-        pedidoReciente?.numero === validado.data.numero.trim().toUpperCase() &&
-        pedidoReciente.correo.toLowerCase() === validado.data.correo.trim().toLowerCase()
-          ? pedidoReciente
-          : await buscarPedidoPublico(validado.data.numero, validado.data.correo);
+      const pedido = await buscarPedidoPublico(validado.data.numero, validado.data.correo);
       setResultado(pedido ? { tipo: "pedido", pedido } : { tipo: "no-encontrado" });
     } catch {
       setResultado({ tipo: "error" });
@@ -58,22 +51,18 @@ export function BuscadorSeguimiento() {
     <div className="flex flex-col gap-8">
       <form onSubmit={alEnviar} noValidate className="flex max-w-md flex-col gap-4">
         <p className="text-gris-medio">
-          Ingresa el número que te enviamos al comprar y el correo que usaste.
+          Ingresa el número de pedido que te enviamos por correo al comprar y el correo que usaste.
         </p>
-        <AvisoModoDemostracion>
-          Prueba con <strong>SED-10482</strong> y <strong>demo@sedyjo.cl</strong>.
-        </AvisoModoDemostracion>
 
         <ResumenErrores ref={resumenRef} prefijo="seg" errores={errores} etiquetas={ETIQUETAS} />
 
         <CampoTexto
           id="seg-numero"
-          etiqueta="Número de pedido"
+          etiqueta="Número de pedido (ejemplo: SED-12345)"
           value={numero}
           onChange={(e) => setNumero(e.target.value)}
           error={errores.numero}
           autoComplete="off"
-          placeholder="SED-10482"
           required
         />
         <CampoTexto

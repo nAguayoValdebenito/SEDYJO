@@ -9,6 +9,8 @@ import { correoSchema } from "./auth";
 export const perfilSchema = z.object({
   nombre: z.string().trim().min(2, "Escribe tu nombre (al menos 2 letras)."),
   correo: correoSchema,
+  /** Contraseña actual: la API la exige solo si cambia el correo. */
+  contrasena: z.string().optional(),
 });
 
 export const contrasenaSchema = z
@@ -38,8 +40,8 @@ export const direccionSchema = z.object({
     .max(30, "Usa un nombre de hasta 30 letras."),
   calle: z.string().trim().min(2, "Escribe la calle."),
   numero: z.string().trim().min(1, "Escribe el número."),
-  comuna: z.string().trim().min(2, "Escribe la comuna."),
-  region: z.string().trim().min(2, "Escribe la región."),
+  comuna: z.string().trim().min(2, "Elige tu comuna."),
+  region: z.string().trim().min(2, "Elige tu comuna para completar la región."),
   referencia: z.string().trim().max(120, "Usa hasta 120 caracteres.").default(""),
 });
 

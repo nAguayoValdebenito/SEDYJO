@@ -6,6 +6,7 @@ import { BarraSuperior } from "@/components/layout/BarraSuperior";
 import { Encabezado } from "@/components/layout/Encabezado";
 import { FondoAnimado } from "@/components/layout/FondoAnimado";
 import { PiePagina } from "@/components/layout/PiePagina";
+import { SincronizarSesion } from "@/features/auth/components/SincronizarSesion";
 import { PanelCarrito } from "@/features/carrito/components/PanelCarrito";
 import { SeccionModalPromocion } from "@/features/promociones/components/SeccionModalPromocion";
 import { DESCRIPCION_SITIO, NOMBRE_SITIO, URL_SITIO } from "@/lib/config";
@@ -72,6 +73,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <Encabezado />
         </Suspense>
         <BarraEnvioGratis />
+        <SincronizarSesion />
         <ViewTransition default="pagina">{children}</ViewTransition>
         <PiePagina />
         <Suspense fallback={null}>
