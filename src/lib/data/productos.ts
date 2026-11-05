@@ -17,7 +17,7 @@ export async function getProducts(filtro?: {
   categoriaSlug?: string;
 }): Promise<Producto[]> {
   "use cache";
-  cacheLife("hours");
+  cacheLife("catalogo");
 
   let productos = await obtenerCatalogo();
   if (filtro?.coleccion) {
@@ -37,7 +37,7 @@ export async function searchProducts(
   categoriaSlug?: string,
 ): Promise<Producto[]> {
   "use cache";
-  cacheLife("minutes");
+  cacheLife("catalogo");
 
   return (await obtenerCatalogo())
     .filter((p) => !categoriaSlug || p.categoriaSlug === categoriaSlug)
@@ -53,14 +53,14 @@ export async function getRecommendations(opciones: {
   variarCategorias?: boolean;
 }): Promise<Producto[]> {
   "use cache";
-  cacheLife("hours");
+  cacheLife("catalogo");
 
   return seleccionarRecomendaciones(await obtenerCatalogo(), opciones);
 }
 
 export async function getProductBySlug(slug: string): Promise<Producto | null> {
   "use cache";
-  cacheLife("hours");
+  cacheLife("catalogo");
 
   const productos = await obtenerCatalogo();
   return productos.find((p) => p.slug === slug) ?? null;
@@ -72,7 +72,7 @@ export async function getProductBySlug(slug: string): Promise<Producto | null> {
  */
 export async function getOfertaDelDia(): Promise<OfertaDelDia | null> {
   "use cache";
-  cacheLife("minutes");
+  cacheLife("catalogo");
 
   const [oferta, catalogo] = await Promise.all([obtenerOfertaDelDia(), obtenerCatalogo()]);
   return adaptarOfertaDelDia(oferta, catalogo);
@@ -81,7 +81,7 @@ export async function getOfertaDelDia(): Promise<OfertaDelDia | null> {
 /** Oferta vigente para la franja oscura de la portada (`GET /offers`), con hasta 4 productos. */
 export async function getOfertaDestacada(): Promise<OfertaDestacada | null> {
   "use cache";
-  cacheLife("minutes");
+  cacheLife("catalogo");
 
   const [ofertas, catalogo] = await Promise.all([obtenerOfertas(), obtenerCatalogo()]);
   return adaptarOfertaDestacada(ofertas, catalogo);
@@ -90,7 +90,7 @@ export async function getOfertaDestacada(): Promise<OfertaDestacada | null> {
 /** Productos relacionados con uno dado (misma categoría primero). */
 export async function getRelatedProducts(slug: string, limite: number): Promise<Producto[]> {
   "use cache";
-  cacheLife("hours");
+  cacheLife("catalogo");
 
   const productos = await obtenerCatalogo();
   const actual = productos.find((p) => p.slug === slug);

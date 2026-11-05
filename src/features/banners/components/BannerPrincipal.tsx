@@ -82,14 +82,44 @@ export function BannerPrincipal({ banners }: Props) {
             exit={{ opacity: 0, x: -24 }}
             transition={{ duration: 0.28 }}
             aria-live={pausado ? "polite" : "off"}
-            className="relative flex min-h-[inherit] flex-col justify-center gap-2 px-5 pb-[46px] pt-6 md:gap-3.5 md:px-11 md:py-10"
+            className="relative flex min-h-[inherit] flex-col justify-center px-5 pb-[46px] pt-6 md:grid md:grid-cols-[minmax(0,1fr)_42%] md:items-center md:gap-6 md:px-11 md:pb-[72px] md:pt-10"
           >
+            {/*
+              Columna de texto: nunca invade la imagen (min-w-0 + palabras que se parten si hace falta).
+            */}
+            <div className="relative flex min-w-0 flex-col gap-2 md:gap-3.5">
+              {banner.etiqueta && (
+                <span className="relative text-xs font-bold uppercase tracking-[0.12em] text-verde-oscuro">
+                  {banner.etiqueta}
+                </span>
+              )}
+              <h2 className="relative max-w-[170px] break-words font-titulos text-[28px] font-extrabold leading-[1.02] md:max-w-none md:text-[34px] lg:text-[44px]">
+                {banner.titulo}
+              </h2>
+              <p className="relative hidden max-w-[340px] text-[15px] leading-normal text-gris-medio md:block">
+                {banner.texto}
+              </p>
+              {banner.boton && (
+                <Link
+                  href={banner.boton.href}
+                  className={claseBoton("primario", "lg", "relative mt-1 self-start md:mt-0")}
+                >
+                  {banner.boton.texto}
+                </Link>
+              )}
+            </div>
+
+            {/*
+              Imagen: siempre un cuadro (la medida que pide el administrador es cuadrada, 700×700).
+              Las fotos con fondo se recortan con esquinas redondeadas; los recortes con fondo
+              transparente se ven igual sobre el verde suave.
+            */}
             <div
               aria-hidden={banner.imagen ? undefined : true}
               className={cn(
-                "absolute right-3.5 top-[18px] h-[110px] w-[38%] md:bottom-20 md:right-9 md:top-9 md:h-auto md:w-[44%]",
+                "absolute right-3.5 top-[18px] size-[110px] overflow-hidden rounded-lg md:relative md:right-auto md:top-auto md:aspect-square md:size-auto md:w-full md:max-w-[300px] md:justify-self-end md:rounded-[10px]",
                 !banner.imagen &&
-                  "flex items-center justify-center rounded-lg border-2 border-dashed border-verde p-1.5 text-center text-[11px] text-verde-oscuro md:rounded-[10px] md:p-3 md:text-[13px]",
+                  "flex items-center justify-center border-2 border-dashed border-verde p-1.5 text-center text-[11px] text-verde-oscuro md:p-3 md:text-[13px]",
               )}
             >
               {banner.imagen ? (
@@ -98,33 +128,13 @@ export function BannerPrincipal({ banners }: Props) {
                   alt={banner.alt}
                   fill
                   priority={indice === 0}
-                  sizes="(min-width: 768px) 260px, 140px"
-                  className="object-contain"
+                  sizes="(min-width: 768px) 300px, 110px"
+                  className="object-cover"
                 />
               ) : (
                 "[imagen del banner principal]"
               )}
             </div>
-
-            {banner.etiqueta && (
-              <span className="relative text-xs font-bold uppercase tracking-[0.12em] text-verde-oscuro">
-                {banner.etiqueta}
-              </span>
-            )}
-            <h2 className="relative max-w-[170px] font-titulos text-[28px] font-extrabold leading-[1.02] md:max-w-[300px] md:text-[46px]">
-              {banner.titulo}
-            </h2>
-            <p className="relative hidden max-w-[280px] text-[15px] leading-normal text-gris-medio md:block">
-              {banner.texto}
-            </p>
-            {banner.boton && (
-              <Link
-                href={banner.boton.href}
-                className={claseBoton("primario", "lg", "relative mt-1 self-start md:mt-0")}
-              >
-                {banner.boton.texto}
-              </Link>
-            )}
           </m.div>
         </AnimatePresence>
       </LazyMotion>

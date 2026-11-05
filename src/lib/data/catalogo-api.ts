@@ -43,7 +43,7 @@ async function pedirJson(ruta: string): Promise<unknown> {
 /** Todos los productos activos (recorre las páginas de la API). */
 export async function obtenerCatalogo(): Promise<Producto[]> {
   "use cache";
-  cacheLife("minutes");
+  cacheLife("catalogo");
 
   const productos: ProductoApi[] = [];
   let pagina = 1;
@@ -62,7 +62,7 @@ export async function obtenerCatalogo(): Promise<Producto[]> {
 
 export async function obtenerCategorias(): Promise<Categoria[]> {
   "use cache";
-  cacheLife("minutes");
+  cacheLife("catalogo");
 
   const { data } = categoriasApiSchema.parse(await pedirJson("/categories"));
   return adaptarCategorias(data, await obtenerCatalogo());
@@ -80,7 +80,7 @@ type BannersDeLaPagina = {
  */
 export async function obtenerBanners(): Promise<BannersDeLaPagina> {
   "use cache";
-  cacheLife("minutes");
+  cacheLife("catalogo");
 
   try {
     const { data } = bannersApiSchema.parse(await pedirJson("/banners"));
@@ -102,7 +102,7 @@ export async function obtenerImagenesSitio(): Promise<
   Record<string, { url: string; alt: string }>
 > {
   "use cache";
-  cacheLife("minutes");
+  cacheLife("catalogo");
 
   try {
     const { data } = imagenesSitioRespuestaSchema.parse(await pedirJson("/site-images"));
@@ -123,7 +123,7 @@ export async function obtenerImagenesSitio(): Promise<
  */
 export async function obtenerDespacho(): Promise<Despacho | null> {
   "use cache";
-  cacheLife("minutes");
+  cacheLife("catalogo");
 
   try {
     return adaptarDespacho(despachoApiSchema.parse(await pedirJson("/shipping")).data);
@@ -135,7 +135,7 @@ export async function obtenerDespacho(): Promise<Despacho | null> {
 /** Ofertas vigentes con sus productos (`GET /offers`). Si la API falla, no hay ofertas destacadas. */
 export async function obtenerOfertas(): Promise<OfertaApi[]> {
   "use cache";
-  cacheLife("minutes");
+  cacheLife("catalogo");
 
   try {
     return z.object({ data: z.array(ofertaApiSchema) }).parse(await pedirJson("/offers")).data;
@@ -147,7 +147,7 @@ export async function obtenerOfertas(): Promise<OfertaApi[]> {
 /** La oferta del día vigente (`GET /offers/daily`), o `null` si no hay. */
 export async function obtenerOfertaDelDia(): Promise<OfertaApi | null> {
   "use cache";
-  cacheLife("minutes");
+  cacheLife("catalogo");
 
   try {
     return z.object({ data: ofertaApiSchema.nullable() }).parse(await pedirJson("/offers/daily"))
