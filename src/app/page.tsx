@@ -7,11 +7,9 @@ import { EsqueletoBanners } from "@/features/banners/components/EsqueletoBanners
 import { SeccionBannersPortada } from "@/features/banners/components/SeccionBannersPortada";
 import {
   EsqueletoCategorias,
-  EsqueletoExclusivoOnline,
   EsqueletoOfertasSemana,
 } from "@/features/catalogo/components/Esqueletos";
 import { SeccionCategorias } from "@/features/catalogo/components/SeccionCategorias";
-import { SeccionExclusivoOnline } from "@/features/catalogo/components/SeccionExclusivoOnline";
 import { SeccionOfertasSemana } from "@/features/catalogo/components/SeccionOfertasSemana";
 import { organizacionJsonLd, sitioWebJsonLd } from "@/lib/seo/jsonld";
 
@@ -32,10 +30,6 @@ export default function Inicio() {
           <SeccionCategorias />
         </Suspense>
       </Contenedor>
-
-      <Suspense fallback={<EsqueletoExclusivoOnline />}>
-        <SeccionExclusivoOnline />
-      </Suspense>
 
       <Contenedor>
         <Suspense fallback={<EsqueletoOfertasSemana />}>
