@@ -1,32 +1,114 @@
 "use server";
 
-import { randomUUID } from "node:crypto";
-import { getProducts } from "@/lib/data";
-import { calcularTotales } from "@/lib/utils/checkout";
+import { cookies } from "next/headers";
+import { z } from "zod";
+import type { FalloApi } from "@/lib/data/cliente-api";
+import {
+  cotizarApi,
+  crearPedidoApi,
+  obtenerPedidoApi,
+  simularPagoApi,
+} from "@/lib/data/pedidos-api";
+import { leerTokenSesion } from "@/lib/sesion";
 import {
   checkoutSchema,
   erroresCheckoutPorCampo,
   itemsCheckoutSchema,
 } from "@/lib/validation/checkout";
-import { pedidoSchema } from "@/lib/validation/schemas";
-import type { DatosCheckout, ItemPedido, Pedido, ResultadoPago } from "@/types";
+import type { Cotizacion, Pedido, ProblemaCotizacion, ResultadoPago } from "@/types";
 
-type ResumenValidado = Pick<Pedido, "items" | "subtotal" | "despacho" | "total">;
-type PagoPendiente = { datos: DatosCheckout; resumen: ResumenValidado; vence: number };
+/**
+ * Acciones de compra: cotizar, crear el pedido y confirmar el pago contra la API de Sedyjo.
+ * Los precios, el despacho y el total los calcula la API; aquí solo se envía qué productos y
+ * cuántos. Los tokens viajan en cookies HttpOnly: el navegador nunca los lee.
+ */
 
-// Persistencia temporal de la demo. Una pasarela real y la base de datos reemplazarán este mapa.
-const pendientes = new Map<string, PagoPendiente>();
-const DEMORA_MS = 500;
-const pausa = () => new Promise((resolver) => setTimeout(resolver, DEMORA_MS));
+const cookiePedido = (id: string) => `sedyjo_pedido_${id}`;
+const DURACION_COOKIE_PEDIDO_S = 60 * 60 * 24;
 
+const claveSchema = z.string().min(8).max(100);
+const idSchema = z.string().min(1).max(100);
+
+async function credenciales(pedidoId?: string) {
+  const almacen = await cookies();
+  return {
+    sesion: await leerTokenSesion(),
+    pedido: pedidoId ? (almacen.get(cookiePedido(pedidoId))?.value ?? null) : null,
+  };
+}
+
+export type ResultadoCotizacion =
+  { ok: true; cotizacion: Cotizacion } | { ok: false; mensaje: string };
+
+/** Precios vigentes, despacho y total del carrito. La comuna es opcional. */
+export async function cotizarCompra(
+  entradaItems: unknown,
+  comuna?: string,
+): Promise<ResultadoCotizacion> {
+  const items = itemsCheckoutSchema.safeParse(entradaItems);
+  if (!items.success) return { ok: false, mensaje: "El carrito no contiene productos válidos." };
+
+  const resultado = await cotizarApi(items.data, comuna?.trim() || undefined);
+  if (!resultado.ok) {
+    return { ok: false, mensaje: "No pudimos calcular el total. Intenta de nuevo." };
+  }
+  return { ok: true, cotizacion: resultado.data };
+}
+
+export type ResultadoInicioPago =
+  | { ok: true; pedido: Pedido }
+  | {
+      ok: false;
+      mensaje: string;
+      campos?: Record<string, string>;
+      problemas?: ProblemaCotizacion[];
+    };
+
+function mensajeDeCreacion(fallo: FalloApi): ResultadoInicioPago & { ok: false } {
+  switch (fallo.code) {
+    case "validacion":
+      return {
+        ok: false,
+        mensaje: "Revisa los datos del formulario antes de continuar.",
+        campos: fallo.campos,
+      };
+    case "items_invalidos":
+      return {
+        ok: false,
+        mensaje:
+          "Algunos productos ya no están disponibles en la cantidad que pediste. Revisa tu carrito.",
+        problemas: fallo.problemas ?? [],
+      };
+    case "fuera_de_cobertura":
+      return {
+        ok: false,
+        mensaje: "Todavía no despachamos a esa comuna. Elige una de las comunas con despacho.",
+        campos: { comuna: "Sin despacho a esta comuna." },
+      };
+    case "despacho_no_definido":
+      return {
+        ok: false,
+        mensaje: "No pudimos calcular el despacho de este pedido. Intenta más tarde o contáctanos.",
+      };
+    case "demasiados_intentos":
+      return {
+        ok: false,
+        mensaje: "Hiciste muchos intentos seguidos. Espera unos minutos e inténtalo otra vez.",
+      };
+    default:
+      return { ok: false, mensaje: fallo.mensaje };
+  }
+}
+
+/**
+ * Crea el pedido (reserva el stock por 30 minutos). `claveIdempotencia` evita pedidos duplicados
+ * si el cliente repite la petición: se reutiliza mientras no cambien los datos de la compra.
+ */
 export async function iniciarPago(
   entrada: unknown,
   entradaItems: unknown,
-): Promise<
-  | { ok: true; token: string; resumen: ResumenValidado }
-  | { ok: false; mensaje: string; campos?: Record<string, string> }
-> {
-  await pausa();
+  claveIdempotencia: string,
+): Promise<ResultadoInicioPago> {
   const datos = checkoutSchema.safeParse(entrada);
   if (!datos.success) {
     return {
@@ -37,85 +119,68 @@ export async function iniciarPago(
   }
   const items = itemsCheckoutSchema.safeParse(entradaItems);
   if (!items.success) return { ok: false, mensaje: "El carrito no contiene productos válidos." };
+  const clave = claveSchema.safeParse(claveIdempotencia);
+  if (!clave.success)
+    return { ok: false, mensaje: "No pudimos iniciar el pago. Intenta de nuevo." };
 
-  const catalogo = await getProducts();
-  const pedidos: ItemPedido[] = [];
-  for (const item of items.data) {
-    if (pedidos.some((existente) => existente.productoId === item.productoId)) {
-      return {
-        ok: false,
-        mensaje: "El carrito contiene un producto repetido. Revísalo e intenta de nuevo.",
-      };
-    }
-    const producto = catalogo.find((p) => p.id === item.productoId);
-    if (!producto || producto.stock < item.cantidad) {
-      return {
-        ok: false,
-        mensaje: `${producto?.nombre ?? "Un producto"} está agotado o no tiene suficientes unidades.`,
-      };
-    }
-    pedidos.push({
-      productoId: producto.id,
-      slug: producto.slug,
-      nombre: producto.nombre,
-      precio: producto.precio,
-      cantidad: item.cantidad,
-      imagen: producto.imagenes[0] ?? null,
-      fondo: producto.fondo,
+  const { sesion } = await credenciales();
+  const { nombre, correo, telefono, metodoEntrega, calle, numero, comuna, region, referencia } =
+    datos.data;
+  const resultado = await crearPedidoApi(
+    {
+      nombre,
+      correo,
+      telefono,
+      metodoEntrega,
+      calle,
+      numero,
+      comuna,
+      region,
+      referencia,
+      metodoPago: "webpay",
+      items: items.data,
+    },
+    clave.data,
+    sesion,
+  );
+  if (!resultado.ok) return mensajeDeCreacion(resultado);
+
+  const { pedido, accessToken } = resultado.data;
+  // El token se entrega una sola vez; si la petición se repitió, ya está en la cookie anterior.
+  if (accessToken) {
+    (await cookies()).set(cookiePedido(pedido.id), accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: DURACION_COOKIE_PEDIDO_S,
     });
   }
-
-  const subtotal = pedidos.reduce((suma, item) => suma + item.precio * item.cantidad, 0);
-  const resumen: ResumenValidado = {
-    items: pedidos,
-    ...calcularTotales(subtotal),
-  };
-  const token = randomUUID();
-  pendientes.set(token, { datos: datos.data, resumen, vence: Date.now() + 15 * 60_000 });
-  return { ok: true, token, resumen };
+  return { ok: true, pedido };
 }
 
-export async function confirmarPagoSimulado(
-  token: string,
-  resultado: "exito" | "error",
-): Promise<ResultadoPago> {
-  await pausa();
-  if (resultado !== "exito" && resultado !== "error") return { ok: false, motivo: "invalido" };
-  const pendiente = pendientes.get(token);
-  if (!pendiente || pendiente.vence < Date.now()) {
-    pendientes.delete(token);
-    return { ok: false, motivo: "tiempo-agotado" };
-  }
-  pendientes.delete(token);
-  if (resultado === "error" || pendiente.datos.correo.toLowerCase() === "error@sedyjo.cl") {
-    return { ok: false, motivo: "rechazado" };
+/**
+ * PUNTO ÚNICO DE PAGO. Hoy la API confirma el pago con su pasarela simulada
+ * (`POST /orders/:id/simulate-payment`, solo mientras `SIMULATED_PAYMENTS=true`). Cuando se
+ * integre Webpay, solo se reemplaza el interior de esta función por la redirección a Transbank:
+ * el pedido se marcará como pagado desde el servidor y el resto del flujo (consultar el pedido,
+ * mostrar el éxito o el error) no cambia.
+ */
+export async function pagarPedido(pedidoId: string): Promise<ResultadoPago> {
+  const id = idSchema.safeParse(pedidoId);
+  if (!id.success) return { ok: false, motivo: "invalido" };
+
+  const acceso = await credenciales(id.data);
+  const simulacion = await simularPagoApi(id.data, "pagado", acceso);
+  if (!simulacion.ok) {
+    return { ok: false, motivo: simulacion.status === 404 ? "no-disponible" : "invalido" };
   }
 
-  const ahora = new Date().toISOString();
-  const datos = pendiente.datos;
-  const pedido: Pedido = pedidoSchema.parse({
-    id: randomUUID(),
-    numero: `SED-${String(10000 + Math.floor(Math.random() * 10000))}`,
-    usuarioId: datos.usuarioId ?? "",
-    correo: datos.correo,
-    fecha: ahora,
-    estado: "recibido",
-    metodoEntrega: datos.metodoEntrega,
-    direccion:
-      datos.metodoEntrega === "despacho"
-        ? {
-            calle: datos.calle,
-            numero: datos.numero,
-            comuna: datos.comuna,
-            region: datos.region,
-            referencia: datos.referencia || null,
-          }
-        : null,
-    ...pendiente.resumen,
-    metodoPago: "Webpay Plus (simulado)",
-    eventos: [
-      { estado: "recibido", fecha: ahora, detalle: "Pedido recibido en modo demostración." },
-    ],
-  });
-  return { ok: true, pedido };
+  // El estado real del pago lo decide la API, no la respuesta de la simulación.
+  const consulta = await obtenerPedidoApi(id.data, acceso);
+  if (!consulta.ok) return { ok: false, motivo: "invalido" };
+
+  const pedido = consulta.data;
+  if (pedido.pago?.estado === "pagado") return { ok: true, pedido };
+  return { ok: false, motivo: pedido.pago?.estado === "expirado" ? "tiempo-agotado" : "rechazado" };
 }

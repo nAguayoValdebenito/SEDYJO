@@ -1,7 +1,7 @@
 import { cacheLife } from "next/cache";
 import { z } from "zod";
 import { URL_API } from "@/lib/config";
-import type { Banner, BannerOscuro, CampanaModal, Categoria, Producto } from "@/types";
+import type { Banner, BannerOscuro, CampanaModal, Categoria, Despacho, Producto } from "@/types";
 import {
   adaptarBannersOscuros,
   adaptarBannersPrincipales,
@@ -11,9 +11,12 @@ import {
   bannerApiSchema,
   categoriaApiSchema,
   imagenesSitioApiSchema,
+  ofertaApiSchema,
   respuestaProductosSchema,
+  type OfertaApi,
   type ProductoApi,
 } from "./adaptador-api";
+import { adaptarDespacho, despachoApiSchema } from "./adaptador-pedidos";
 
 /**
  * Lectura de la API de Sedyjo (solo servidor). Es la única parte del frontend que habla con
@@ -111,5 +114,45 @@ export async function obtenerImagenesSitio(): Promise<
     );
   } catch {
     return {};
+  }
+}
+
+/**
+ * Reglas de despacho vigentes: monto para despacho gratis, plazo y comunas atendidas con su costo.
+ * Si la API falla devuelve `null` y cada pantalla avisa que no pudo cargarlas.
+ */
+export async function obtenerDespacho(): Promise<Despacho | null> {
+  "use cache";
+  cacheLife("minutes");
+
+  try {
+    return adaptarDespacho(despachoApiSchema.parse(await pedirJson("/shipping")).data);
+  } catch {
+    return null;
+  }
+}
+
+/** Ofertas vigentes con sus productos (`GET /offers`). Si la API falla, no hay ofertas destacadas. */
+export async function obtenerOfertas(): Promise<OfertaApi[]> {
+  "use cache";
+  cacheLife("minutes");
+
+  try {
+    return z.object({ data: z.array(ofertaApiSchema) }).parse(await pedirJson("/offers")).data;
+  } catch {
+    return [];
+  }
+}
+
+/** La oferta del día vigente (`GET /offers/daily`), o `null` si no hay. */
+export async function obtenerOfertaDelDia(): Promise<OfertaApi | null> {
+  "use cache";
+  cacheLife("minutes");
+
+  try {
+    return z.object({ data: ofertaApiSchema.nullable() }).parse(await pedirJson("/offers/daily"))
+      .data;
+  } catch {
+    return null;
   }
 }

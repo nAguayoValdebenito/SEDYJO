@@ -82,10 +82,11 @@ export function ExitoCheckout() {
             Pedido {pedidoReciente.numero} recibido
           </h2>
           <p role="status" className="mt-2 text-gris-medio">
-            La compra de demostración terminó correctamente. No se realizó ningún cobro.
+            Recibimos tu pedido y el pago quedó confirmado. Te enviamos la confirmación por correo.
           </p>
           <p className="mt-4 text-sm">
-            Entrega: <strong>despacho a domicilio</strong> en {PLAZO_DESPACHO}.
+            Entrega: <strong>despacho a domicilio</strong> en {PLAZO_DESPACHO}. Guarda el número de
+            pedido para seguirlo.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             {pedidoReciente.usuarioId && (

@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { EncabezadoSeccion } from "@/components/ui/EncabezadoSeccion";
-import { AvisoModoDemostracion } from "@/features/auth/components/AvisoModoDemostracion";
 import { FormularioContrasena } from "@/features/cuenta/components/FormularioContrasena";
 import { FormularioPerfil } from "@/features/cuenta/components/FormularioPerfil";
 
@@ -21,11 +20,6 @@ export default function PaginaPerfil() {
           <h2 id="titulo-clave" className="font-titulos text-xl font-extrabold">
             Cambiar contraseña
           </h2>
-          <div className="max-w-lg">
-            <AvisoModoDemostracion etiqueta="Modo demostración: contraseña">
-              Para probar un error escribe <strong>incorrecta</strong> como contraseña actual.
-            </AvisoModoDemostracion>
-          </div>
           <FormularioContrasena />
         </section>
       </div>

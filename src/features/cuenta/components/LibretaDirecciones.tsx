@@ -7,7 +7,7 @@ import { claseBoton } from "@/components/ui/boton";
 import { Insignia } from "@/components/ui/Insignia";
 import { useSesion } from "@/features/auth/store";
 import { MAX_DIRECCIONES, type EntradaDireccionLibreta } from "@/lib/utils/direcciones";
-import type { DireccionGuardada } from "@/types";
+import type { DireccionGuardada, ZonaDespacho } from "@/types";
 import { useCuenta, useDirecciones } from "../store";
 import { FormularioDireccion } from "./FormularioDireccion";
 
@@ -17,14 +17,15 @@ const controlTexto =
   "inline-flex min-h-11 items-center gap-1.5 rounded-lg px-3 text-sm font-bold text-azul transition-colors duration-200 hover:bg-gris-fondo hover:text-azul-oscuro";
 
 /** Libreta de direcciones: lista, alta, edición, eliminación y dirección principal. */
-export function LibretaDirecciones() {
+export function LibretaDirecciones({ zonas }: { zonas: ZonaDespacho[] }) {
   const usuario = useSesion((s) => s.usuario);
   const usuarioId = usuario?.id ?? null;
   const direcciones = useDirecciones(usuarioId);
-  const agregar = useCuenta((s) => s.agregar);
-  const editar = useCuenta((s) => s.editar);
+  const guardar = useCuenta((s) => s.guardar);
   const eliminar = useCuenta((s) => s.eliminar);
   const hacerPrincipal = useCuenta((s) => s.hacerPrincipal);
+  const estadoCarga = useCuenta((s) => s.estado);
+  const recargar = useCuenta((s) => s.cargar);
 
   const [modo, setModo] = useState<Modo>({ tipo: "lista" });
   const [confirmando, setConfirmando] = useState<string | null>(null);
@@ -43,18 +44,20 @@ export function LibretaDirecciones() {
     );
   };
 
-  const guardarNueva = (entrada: EntradaDireccionLibreta, principal: boolean) => {
-    agregar(usuarioId, entrada, principal);
-    volverALista("Dirección guardada.");
+  const guardarNueva = async (entrada: EntradaDireccionLibreta, principal: boolean) => {
+    const error = await guardar(entrada, { principal });
+    if (!error) volverALista("Dirección guardada.");
+    return error;
   };
-  const guardarEdicion = (id: string, entrada: EntradaDireccionLibreta) => {
-    editar(usuarioId, id, entrada);
-    volverALista("Dirección actualizada.");
+  const guardarEdicion = async (id: string, entrada: EntradaDireccionLibreta) => {
+    const error = await guardar(entrada, { id });
+    if (!error) volverALista("Dirección actualizada.");
+    return error;
   };
-  const quitar = (d: DireccionGuardada) => {
-    eliminar(usuarioId, d.id);
+  const quitar = async (d: DireccionGuardada) => {
+    const error = await eliminar(d.id);
     setConfirmando(null);
-    setAviso(`Eliminamos la dirección ${d.etiqueta}.`);
+    setAviso(error ?? `Eliminamos la dirección ${d.etiqueta}.`);
     requestAnimationFrame(() => encabezado.current?.focus());
   };
 
@@ -96,6 +99,7 @@ export function LibretaDirecciones() {
 
       {modo.tipo === "nueva" && (
         <FormularioDireccion
+          zonas={zonas}
           ofrecerPrincipal={direcciones.length > 0}
           onGuardar={guardarNueva}
           onCancelar={() => volverALista("")}
@@ -103,13 +107,26 @@ export function LibretaDirecciones() {
       )}
       {modo.tipo === "editar" && enEdicion && (
         <FormularioDireccion
+          zonas={zonas}
           inicial={enEdicion}
           onGuardar={(entrada) => guardarEdicion(enEdicion.id, entrada)}
           onCancelar={() => volverALista("")}
         />
       )}
 
-      {direcciones.length === 0 && modo.tipo === "lista" && (
+      {estadoCarga === "error" && (
+        <p
+          role="alert"
+          className="flex flex-wrap items-center gap-3 rounded-lg border border-error p-3 text-sm text-error"
+        >
+          No pudimos cargar tus direcciones.
+          <button type="button" onClick={() => void recargar()} className={controlTexto}>
+            Reintentar
+          </button>
+        </p>
+      )}
+
+      {estadoCarga === "listo" && direcciones.length === 0 && modo.tipo === "lista" && (
         <div className="relative isolate flex flex-col items-start gap-3 overflow-hidden rounded-2xl border border-borde bg-white p-6 sm:p-8">
           <BurbujasDecorativas tono="claro" className="-z-10 opacity-70" />
           <MapPin size={40} strokeWidth={1.5} aria-hidden="true" className="text-gris-texto" />
@@ -167,9 +184,9 @@ export function LibretaDirecciones() {
                     {!d.principal && (
                       <button
                         type="button"
-                        onClick={() => {
-                          hacerPrincipal(usuarioId, d.id);
-                          setAviso(`${d.etiqueta} ahora es tu dirección principal.`);
+                        onClick={async () => {
+                          const error = await hacerPrincipal(d.id);
+                          setAviso(error ?? `${d.etiqueta} ahora es tu dirección principal.`);
                         }}
                         className={controlTexto}
                       >

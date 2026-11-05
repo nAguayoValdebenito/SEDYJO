@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
+  adaptarOfertaDelDia,
+  adaptarOfertaDestacada,
+  ofertaApiSchema,
   adaptarBannersOscuros,
   adaptarBannersPrincipales,
   adaptarCampanaModal,
@@ -188,5 +191,83 @@ describe("banners", () => {
     expect(campana).toMatchObject({ tipo: "galeria", activo: true, id: "api-5-6" });
     expect(campana?.slides).toHaveLength(2);
     expect(adaptarCampanaModal([banner(1, "hero")])).toBeNull();
+  });
+});
+
+describe("ofertas de la API", () => {
+  const conOferta = productoApiSchema.parse({
+    id: 3,
+    sku: "SED-003",
+    slug: "coca-cola-zero",
+    name: "Coca-Cola Zero",
+    description: "Coca-Cola · 350 ml",
+    category: "Bebidas",
+    price: 1190,
+    stock: 20,
+    image: "https://api.sedyjo.com/images/3.webp",
+    offerPrice: 893,
+    discountPercent: 25,
+  });
+  const sinOferta = productoApiSchema.parse({
+    id: 4,
+    sku: "SED-004",
+    name: "Crush",
+    category: "Bebidas",
+    price: 990,
+    stock: 10,
+    image: null,
+  });
+
+  it("cobra el precio de oferta y guarda el normal como anterior", () => {
+    const [oferta, normal] = adaptarCatalogo([conOferta, sinOferta]);
+    expect(oferta).toMatchObject({ precio: 893, precioAnterior: 1190, slug: "coca-cola-zero" });
+    expect(normal).toMatchObject({ precio: 990, precioAnterior: null, slug: "crush" });
+  });
+
+  it("calcula el precio por unidad con el precio que se cobra", () => {
+    const [oferta] = adaptarCatalogo([conOferta]);
+    expect(oferta.precioPorUnidad).toBe("$2.551 / L");
+  });
+
+  it("deja primero en 'semana' lo que está en oferta", () => {
+    const catalogo = adaptarCatalogo([sinOferta, conOferta]);
+    expect(catalogo.find((p) => p.id === "3")?.colecciones).toEqual(["semana"]);
+    expect(catalogo.find((p) => p.id === "4")?.colecciones).toEqual([]);
+  });
+
+  const ofertaDia = ofertaApiSchema.parse({
+    id: 1,
+    title: "Oferta del día",
+    description: "25% en bebidas",
+    image: "https://api.sedyjo.com/images/offer-daily.png",
+    isDaily: true,
+    products: [{ id: 3 }, { id: 4 }],
+    endsAt: null,
+  });
+  const ofertaSemana = ofertaApiSchema.parse({
+    id: 2,
+    title: "20% en bebidas",
+    position: 2,
+    products: [{ id: 3 }],
+    endsAt: "2026-12-31T23:59:59.000Z",
+  });
+
+  it("elige el producto con mayor descuento para la oferta del día", () => {
+    const catalogo = adaptarCatalogo([sinOferta, conOferta]);
+    const resultado = adaptarOfertaDelDia(ofertaDia, catalogo);
+    expect(resultado?.producto.id).toBe("3");
+    expect(resultado?.imagen).toBe("https://api.sedyjo.com/images/offer-daily.png");
+    expect(adaptarOfertaDelDia(null, catalogo)).toBeNull();
+  });
+
+  it("la franja destacada usa la primera oferta que no es la del día", () => {
+    const catalogo = adaptarCatalogo([sinOferta, conOferta]);
+    const resultado = adaptarOfertaDestacada([ofertaDia, ofertaSemana], catalogo);
+    expect(resultado).toMatchObject({
+      titulo: "20% en bebidas",
+      terminaEn: "2026-12-31T23:59:59.000Z",
+    });
+    expect(resultado?.productos.map((p) => p.id)).toEqual(["3"]);
+    expect(adaptarOfertaDestacada([ofertaDia], catalogo)).toBeNull();
   });
 });

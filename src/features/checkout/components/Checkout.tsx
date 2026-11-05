@@ -10,17 +10,18 @@ import { claseBoton } from "@/components/ui/boton";
 import { useSesion } from "@/features/auth/store";
 import { useCarrito } from "@/features/carrito/store";
 import { useCuenta, useDirecciones } from "@/features/cuenta/store";
+import { CampoComuna } from "@/features/despacho/components/CampoComuna";
 import { useHidratado } from "@/features/carrito/useHidratado";
-import { DESPACHO_GRATIS_DESDE, PLAZO_DESPACHO, ZONAS_DESPACHO } from "@/lib/config";
+import { DESPACHO_GRATIS_DESDE, PLAZO_DESPACHO } from "@/lib/config";
 import { MAX_DIRECCIONES, direccionPrincipal, mismaDireccion } from "@/lib/utils/direcciones";
 import { formatoPrecio } from "@/lib/utils/format";
 import { checkoutSchema, erroresCheckoutPorCampo } from "@/lib/validation/checkout";
-import type { DatosCheckout } from "@/types";
-import { iniciarPago } from "../acciones";
+import type { Cotizacion, DatosCheckout, Despacho } from "@/types";
+import { cotizarCompra, iniciarPago, pagarPedido } from "../acciones";
 import { useCheckout } from "../store";
 import { EsqueletoCheckout } from "./EsqueletoCheckout";
 import { IndicadorCheckout } from "./IndicadorCheckout";
-import { ResumenCheckout } from "./ResumenCheckout";
+import { ResumenCheckout, type LineaResumen } from "./ResumenCheckout";
 import { SelectorDireccion } from "./SelectorDireccion";
 
 const ETIQUETAS: Record<string, string> = {
@@ -32,17 +33,27 @@ const ETIQUETAS: Record<string, string> = {
   comuna: "Comuna",
   region: "Región",
 };
-export function Checkout() {
+const FONDO_NEUTRO = "#E8F4EE";
+
+type Props = {
+  /** Comunas con despacho y reglas de la API; `null` si no se pudieron cargar. */
+  despacho: Despacho | null;
+};
+
+export function Checkout({ despacho }: Props) {
   const router = useRouter();
   const hidratado = useHidratado();
   const usuario = useSesion((s) => s.usuario);
   const items = useCarrito((s) => s.items);
-  const { datos, paso, cambiarDatos, cambiarPaso, guardarToken } = useCheckout();
+  const { datos, paso, cambiarDatos, cambiarPaso, guardarPedido, guardarError } = useCheckout();
   const [errores, setErrores] = useState<Record<string, string>>({});
   const [errorGeneral, setErrorGeneral] = useState("");
   const [enviando, setEnviando] = useState(false);
+  const clavePago = useRef<{ firma: string; uuid: string } | null>(null);
+  const zonas = despacho?.zonas ?? [];
+  const comunasAtendidas = zonas.map((z) => z.comuna);
   const direcciones = useDirecciones(usuario?.id ?? null);
-  const guardarEnLibreta = useCuenta((s) => s.agregar);
+  const guardarEnLibreta = useCuenta((s) => s.guardar);
   const [eleccionManual, setEleccionManual] = useState<string | null>(null);
   const [guardarNueva, setGuardarNueva] = useState(false);
   const resumen = useRef<HTMLDivElement>(null);
@@ -54,9 +65,74 @@ export function Checkout() {
       cambiarDatos({ nombre: usuario.nombre, correo: usuario.correo, usuarioId: usuario.id });
   }, [usuario, datos.nombre, datos.correo, cambiarDatos]);
 
+  // Cotización: precios vigentes, despacho y total los calcula la API cada vez que cambia el
+  // carrito o la comuna. Mientras responde se sigue mostrando la cotización anterior.
+  const firmaItems = items.map((i) => `${i.productoId}:${i.cantidad}`).join("|");
+  const claveCotizacion = `${firmaItems}@${datos.comuna}`;
+  const [resultadoCotizacion, setResultadoCotizacion] = useState<{
+    clave: string;
+    cotizacion: Cotizacion | null;
+  } | null>(null);
+
+  useEffect(() => {
+    if (!hidratado || items.length === 0) return;
+    let vigente = true;
+    const espera = setTimeout(() => {
+      cotizarCompra(
+        items.map(({ productoId, cantidad }) => ({ productoId, cantidad })),
+        datos.comuna || undefined,
+      )
+        .then((r) => r)
+        .catch(() => ({ ok: false as const }))
+        .then((r) => {
+          if (vigente) {
+            setResultadoCotizacion({
+              clave: claveCotizacion,
+              cotizacion: r.ok && "cotizacion" in r ? r.cotizacion : null,
+            });
+          }
+        });
+    }, 250);
+    return () => {
+      vigente = false;
+      clearTimeout(espera);
+    };
+  }, [hidratado, items, datos.comuna, claveCotizacion]);
+
+  const cotizacion = resultadoCotizacion?.cotizacion ?? null;
+  const cotizando = resultadoCotizacion?.clave !== claveCotizacion;
+  const fallaCotizacion = !cotizando && resultadoCotizacion?.cotizacion === null;
+  const nombrePorId = new Map(items.map((i) => [i.productoId, i.nombre]));
+  const problemas = cotizacion?.problemas ?? [];
+  const textoProblemas = problemas
+    .map((p) => nombrePorId.get(p.productoId) ?? "Un producto")
+    .join(", ");
+
+  const lineasResumen: LineaResumen[] = cotizacion
+    ? cotizacion.items.map((i) => ({
+        productoId: i.productoId,
+        nombre: i.nombre,
+        precio: i.precio,
+        cantidad: i.cantidad,
+        imagen: i.imagen,
+        fondo: items.find((c) => c.productoId === i.productoId)?.fondo ?? FONDO_NEUTRO,
+      }))
+    : items;
+  const subtotalResumen =
+    cotizacion?.subtotal ?? items.reduce((suma, i) => suma + i.precio * i.cantidad, 0);
+  const despachoPendiente = !datos.comuna
+    ? "Elige tu comuna"
+    : cotizacion && !cotizacion.cobertura
+      ? "Sin despacho a esta comuna"
+      : "Calculando…";
+
   // Dirección elegida: la que el cliente marcó; si no, la guardada que coincide con lo escrito o
   // la principal (que se completa sola al entrar). Sin direcciones guardadas se escribe una nueva.
-  const principal = direccionPrincipal(direcciones);
+  const principalGuardada = direccionPrincipal(direcciones);
+  const principal =
+    principalGuardada && comunasAtendidas.includes(principalGuardada.comuna)
+      ? principalGuardada
+      : undefined;
   const coincidente = direcciones.find((d) => mismaDireccion(d, datos));
   const eleccion =
     eleccionManual ?? coincidente?.id ?? (!datos.calle && principal ? principal.id : "otra");
@@ -89,6 +165,17 @@ export function Checkout() {
     setErrores({});
   };
 
+  const elegirComuna = (comuna: string) => {
+    const zona = zonas.find((z) => z.comuna === comuna);
+    cambiarDatos({ comuna, region: zona?.region ?? "" });
+    setErrores((actual) => {
+      const copia = { ...actual };
+      delete copia.comuna;
+      delete copia.region;
+      return copia;
+    });
+  };
+
   const cambiar = (campo: keyof DatosCheckout, valor: string) => {
     cambiarDatos({ [campo]: valor });
     setErrores((actual) => {
@@ -119,7 +206,7 @@ export function Checkout() {
       direcciones.length < MAX_DIRECCIONES &&
       !direcciones.some((d) => mismaDireccion(d, datos))
     ) {
-      guardarEnLibreta(usuario.id, {
+      void guardarEnLibreta({
         etiqueta: direcciones.length === 0 ? "Casa" : `Dirección ${direcciones.length + 1}`,
         calle: datos.calle.trim(),
         numero: datos.numero.trim(),
@@ -127,6 +214,26 @@ export function Checkout() {
         region: datos.region.trim(),
         referencia: datos.referencia.trim() || null,
       });
+    }
+    if (cotizando || !cotizacion) {
+      setErrorGeneral("Estamos calculando tu total. Espera un momento e inténtalo de nuevo.");
+      enfocarError();
+      return;
+    }
+    if (problemas.length > 0) {
+      setErrorGeneral(`No hay stock suficiente de: ${textoProblemas}. Ajusta tu carrito.`);
+      enfocarError();
+      return;
+    }
+    if (!cotizacion.cobertura) {
+      setErrores({ comuna: "Sin despacho a esta comuna." });
+      enfocarError();
+      return;
+    }
+    if (cotizacion.total === null) {
+      setErrorGeneral("No pudimos calcular el despacho de tu pedido. Intenta más tarde.");
+      enfocarError();
+      return;
     }
     setErrores({});
     setErrorGeneral("");
@@ -147,19 +254,36 @@ export function Checkout() {
     setErrorGeneral("");
     setEnviando(true);
     try {
-      const resultado = await iniciarPago(
-        entrada,
-        items.map(({ productoId, cantidad }) => ({ productoId, cantidad })),
-      );
+      const itemsEntrada = items.map(({ productoId, cantidad }) => ({ productoId, cantidad }));
+      // Misma clave mientras no cambien los datos: un reintento no duplica el pedido.
+      const firma = JSON.stringify([entrada, itemsEntrada]);
+      if (clavePago.current?.firma !== firma) {
+        clavePago.current = { firma, uuid: crypto.randomUUID() };
+      }
+      const resultado = await iniciarPago(entrada, itemsEntrada, clavePago.current.uuid);
       if (!resultado.ok) {
+        clavePago.current = null;
         setErrores(resultado.campos ?? {});
-        setErrorGeneral(resultado.mensaje);
+        setErrorGeneral(
+          resultado.problemas?.length
+            ? `No hay stock suficiente de: ${resultado.problemas
+                .map((p) => nombrePorId.get(p.productoId) ?? "un producto")
+                .join(", ")}. Ajusta tu carrito.`
+            : resultado.mensaje,
+        );
         if (resultado.campos) irAlPaso("datos");
         enfocarError();
         return;
       }
-      guardarToken(resultado.token, resultado.resumen);
-      router.push("/checkout/pago-simulado");
+      clavePago.current = null;
+      const pago = await pagarPedido(resultado.pedido.id);
+      if (pago.ok) {
+        guardarPedido(pago.pedido);
+        router.replace("/checkout/exito");
+      } else {
+        guardarError(pago.motivo);
+        router.replace("/checkout/error");
+      }
     } catch {
       setErrorGeneral("No pudimos iniciar el pago. Intenta de nuevo.");
       enfocarError();
@@ -204,6 +328,26 @@ export function Checkout() {
                 {errorGeneral}
               </div>
             )}
+            {problemas.length > 0 && (
+              <p
+                role="alert"
+                className="mb-4 rounded-lg border-2 border-error p-3 font-medium text-error"
+              >
+                No hay stock suficiente de: {textoProblemas}.{" "}
+                <Link href="/carrito" className="underline">
+                  Ajustar mi carrito
+                </Link>
+              </p>
+            )}
+            {fallaCotizacion && (
+              <p
+                role="alert"
+                className="mb-4 rounded-lg border border-error p-3 text-sm text-error"
+              >
+                No pudimos calcular el total con el servidor. Revisa tu conexión e inténtalo de
+                nuevo.
+              </p>
+            )}
             {paso === "datos" ? (
               <form key="datos" onSubmit={continuar} noValidate className="entrada-paso space-y-4">
                 <ResumenErrores
@@ -235,14 +379,13 @@ export function Checkout() {
                 </div>
                 <CampoTexto
                   id="checkout-telefono"
-                  etiqueta="Celular chileno"
+                  etiqueta="Celular chileno (ejemplo: +56 9 1234 5678)"
                   type="tel"
                   value={datos.telefono}
                   onChange={(e) => cambiar("telefono", e.target.value)}
                   error={errores.telefono}
                   autoComplete="tel"
                   inputMode="tel"
-                  placeholder="+56 9 1234 5678"
                   required
                 />
                 <p
@@ -251,25 +394,30 @@ export function Checkout() {
                 >
                   <Truck size={18} aria-hidden="true" className="mt-0.5 shrink-0" />
                   <span>
-                    Despacho a domicilio en {PLAZO_DESPACHO}. Gratis en compras sobre{" "}
-                    {DESPACHO_GRATIS_DESDE === null
+                    Despacho a domicilio en {despacho?.plazo ?? PLAZO_DESPACHO}. Gratis en compras
+                    sobre{" "}
+                    {(despacho?.gratisDesde ?? DESPACHO_GRATIS_DESDE) === null
                       ? "el monto mínimo"
-                      : formatoPrecio(DESPACHO_GRATIS_DESDE)}
+                      : formatoPrecio((despacho?.gratisDesde ?? DESPACHO_GRATIS_DESDE) as number)}
                     .
                   </span>
                 </p>
+                {!despacho && (
+                  <p role="alert" className="rounded-lg border border-error p-3 text-sm text-error">
+                    No pudimos cargar las comunas con despacho. Recarga la página para intentarlo de
+                    nuevo.
+                  </p>
+                )}
                 {direcciones.length > 0 && (
                   <SelectorDireccion
                     direcciones={direcciones}
                     elegida={eleccion}
                     onElegir={elegirDireccion}
+                    comunasAtendidas={comunasAtendidas}
                   />
                 )}
                 {mostrarCampos && (
                   <div className="space-y-4 rounded-lg bg-gris-fondo p-4">
-                    {ZONAS_DESPACHO && (
-                      <p className="text-sm">Comunas atendidas: {ZONAS_DESPACHO.join(", ")}</p>
-                    )}
                     <div className="grid gap-4 sm:grid-cols-[2fr_1fr]">
                       <CampoTexto
                         id="checkout-calle"
@@ -290,23 +438,13 @@ export function Checkout() {
                       />
                     </div>
                     <div className="grid gap-4 sm:grid-cols-2">
-                      <CampoTexto
-                        id="checkout-comuna"
-                        etiqueta="Comuna"
-                        value={datos.comuna}
-                        onChange={(e) => cambiar("comuna", e.target.value)}
+                      <CampoComuna
+                        prefijo="checkout"
+                        zonas={zonas}
+                        comuna={datos.comuna}
+                        region={datos.region}
+                        onElegir={elegirComuna}
                         error={errores.comuna}
-                        autoComplete="address-level2"
-                        required
-                      />
-                      <CampoTexto
-                        id="checkout-region"
-                        etiqueta="Región"
-                        value={datos.region}
-                        onChange={(e) => cambiar("region", e.target.value)}
-                        error={errores.region}
-                        autoComplete="address-level1"
-                        required
                       />
                     </div>
                     <CampoTexto
@@ -352,13 +490,10 @@ export function Checkout() {
                       className="shrink-0 text-verde-oscuro"
                     />
                     <span>
-                      Webpay Plus <span className="text-gris-medio">(Transbank, simulado)</span>
+                      Webpay Plus <span className="text-gris-medio">(Transbank)</span>
                     </span>
                   </div>
                 </div>
-                <p className="rounded-lg bg-verde-suave p-3 text-sm font-medium text-verde-oscuro">
-                  Modo demostración: no se piden datos de tarjeta ni se realiza un cobro real.
-                </p>
                 <div className="flex flex-wrap gap-3">
                   <button
                     type="button"
@@ -369,14 +504,14 @@ export function Checkout() {
                   </button>
                   <button
                     type="submit"
-                    disabled={enviando}
+                    disabled={enviando || cotizando || !cotizacion || cotizacion.total === null}
                     aria-busy={enviando}
                     className={claseBoton("primario", "lg")}
                   >
                     {enviando ? (
                       <>
                         <Loader2 size={18} aria-hidden="true" className="animate-spin" />
-                        Preparando pago…
+                        Procesando pago…
                       </>
                     ) : (
                       "Pagar"
@@ -388,7 +523,15 @@ export function Checkout() {
           </div>
         </div>
         <div className="order-1 lg:order-2">
-          <ResumenCheckout items={items} />
+          <ResumenCheckout
+            items={lineasResumen}
+            subtotal={subtotalResumen}
+            despacho={cotizacion?.despacho ?? null}
+            total={cotizacion?.total ?? null}
+            despachoPendiente={despachoPendiente}
+            calculando={cotizando}
+            faltaParaGratis={cotizacion?.faltaParaGratis}
+          />
         </div>
       </div>
     </>

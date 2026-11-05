@@ -231,6 +231,13 @@
   will-change: transform;
 }
 
+/* Sobre fondos verdes: los mismos dibujos en blanco y verde pálido, más tenues. Contra el verde
+   oscuro, un trazo al 15 % deja el texto blanco por encima de 4,5:1 incluso justo sobre una línea. */
+.doodles-capa--verde {
+  background-image: url("/patrones/doodles-comercio-claro.svg");
+  opacity: 0.15;
+}
+
 @media (min-width: 640px) {
   .doodles-capa {
     --doodles-tam: 640px;

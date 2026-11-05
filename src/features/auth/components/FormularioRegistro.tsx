@@ -98,7 +98,13 @@ export function FormularioRegistro() {
   const sufijo = volver ? `?volver=${encodeURIComponent(volver)}` : "";
 
   return (
-    <form onSubmit={enviar} noValidate aria-busy={enviando} className="flex flex-col gap-4">
+    <form
+      method="post"
+      onSubmit={enviar}
+      noValidate
+      aria-busy={enviando}
+      className="flex flex-col gap-4"
+    >
       <ResumenErrores ref={resumen} errores={errores} etiquetas={ETIQUETAS} prefijo="registro" />
 
       {errorGeneral && (

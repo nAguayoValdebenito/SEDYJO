@@ -5,7 +5,6 @@ import { usePathname, useRouter } from "next/navigation";
 import { LogOut } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { useSesion } from "../store";
-import { AvisoModoDemostracion } from "./AvisoModoDemostracion";
 
 const SECCIONES = [
   { href: "/cuenta", texto: "Resumen", exacta: true },
@@ -66,10 +65,6 @@ export function NavegacionCuenta() {
           );
         })}
       </nav>
-
-      <AvisoModoDemostracion>
-        Los pedidos que ves son datos de ejemplo de la cuenta demo.
-      </AvisoModoDemostracion>
     </div>
   );
 }

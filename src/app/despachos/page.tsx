@@ -2,12 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { PaginaLectura } from "@/components/ui/PaginaLectura";
 import { ContactoAyuda } from "@/features/contenido/components/ContactoAyuda";
-import {
-  COSTO_DESPACHO,
-  DESPACHO_GRATIS_DESDE,
-  PLAZO_DESPACHO,
-  ZONAS_DESPACHO,
-} from "@/lib/config";
+import { DESPACHO_GRATIS_DESDE, PLAZO_DESPACHO } from "@/lib/config";
+import { getDespacho } from "@/lib/data";
 import { formatoPrecio } from "@/lib/utils/format";
 import { openGraphPagina } from "@/lib/seo/metadata";
 
@@ -22,7 +18,13 @@ export const metadata: Metadata = {
   }),
 };
 
-export default function PaginaDespachos() {
+export default async function PaginaDespachos() {
+  // Plazo, monto de despacho gratis y comunas con su costo vienen de la API de Sedyjo.
+  const despacho = await getDespacho();
+  const plazo = despacho?.plazo ?? PLAZO_DESPACHO;
+  const gratisDesde = despacho?.gratisDesde ?? DESPACHO_GRATIS_DESDE;
+  const zonas = despacho?.zonas ?? [];
+
   return (
     <PaginaLectura
       titulo="Despachos"
@@ -46,7 +48,7 @@ export default function PaginaDespachos() {
           titulo: "Plazo de entrega",
           contenido: (
             <p>
-              Entregamos en <strong>{PLAZO_DESPACHO}</strong> desde la confirmación del pago.
+              Entregamos en <strong>{plazo}</strong> desde la confirmación del pago.
             </p>
           ),
         },
@@ -55,16 +57,16 @@ export default function PaginaDespachos() {
           titulo: "Costo del despacho",
           contenido: (
             <>
-              {DESPACHO_GRATIS_DESDE !== null && (
+              {gratisDesde !== null && (
                 <p>
                   El despacho es <strong>gratis</strong> en compras sobre{" "}
-                  <strong>{formatoPrecio(DESPACHO_GRATIS_DESDE)}</strong>.
+                  <strong>{formatoPrecio(gratisDesde)}</strong>.
                 </p>
               )}
               <p>
-                {COSTO_DESPACHO === null
-                  ? "En compras bajo ese monto, el costo del despacho se confirma al pagar."
-                  : `En compras bajo ese monto, el despacho cuesta ${formatoPrecio(COSTO_DESPACHO)}.`}
+                {zonas.length > 0
+                  ? "En compras bajo ese monto, el costo depende de tu comuna (ver la lista de más abajo). El total final aparece antes de pagar."
+                  : "En compras bajo ese monto, el costo se calcula según tu comuna y aparece antes de pagar."}
               </p>
             </>
           ),
@@ -72,13 +74,24 @@ export default function PaginaDespachos() {
         {
           id: "cobertura",
           titulo: "Dónde despachamos",
-          contenido: (
-            <p>
-              {ZONAS_DESPACHO
-                ? `Comunas atendidas: ${ZONAS_DESPACHO.join(", ")}.`
-                : "Las comunas atendidas se confirman al ingresar tu dirección en el pago."}
-            </p>
-          ),
+          contenido:
+            zonas.length > 0 ? (
+              <>
+                <p>Despachamos a estas comunas, con el costo bajo el monto de despacho gratis:</p>
+                <ul>
+                  {zonas.map((z) => (
+                    <li key={z.id}>
+                      <strong>{z.comuna}</strong> ({z.region}): {formatoPrecio(z.costo)}
+                    </li>
+                  ))}
+                </ul>
+              </>
+            ) : (
+              <p>
+                Las comunas atendidas se muestran al ingresar tu dirección en el pago. Si tu comuna
+                no aparece, todavía no llegamos a ella.
+              </p>
+            ),
         },
         {
           id: "seguimiento",

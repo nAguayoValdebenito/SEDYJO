@@ -10,7 +10,9 @@ export function DetalleEnvio({ pedido }: { pedido: Pick<Pedido, "direccion"> }) 
       <br />
       {d && (
         <>
-          {d.calle} {d.numero}, {d.comuna}, {d.region}
+          {[d.calle && d.numero ? `${d.calle} ${d.numero}` : d.calle, d.comuna, d.region]
+            .filter(Boolean)
+            .join(", ")}
           <br />
           {d.referencia && (
             <>

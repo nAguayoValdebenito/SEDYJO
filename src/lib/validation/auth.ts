@@ -41,6 +41,23 @@ export const registroSchema = z
 
 export const recuperacionSchema = z.object({ correo });
 
+/** Contraseña nueva desde el enlace del correo (el token viene en la URL). */
+export const restablecerSchema = z
+  .object({
+    token: z.string().trim().min(1, "El enlace no es válido."),
+    contrasena: z
+      .string()
+      .min(8, "La contraseña debe tener al menos 8 caracteres.")
+      .max(128, "Usa hasta 128 caracteres.")
+      .regex(/[A-Za-z]/, "Incluye al menos una letra.")
+      .regex(/\d/, "Incluye al menos un número."),
+    confirmar: z.string().min(1, "Repite tu contraseña."),
+  })
+  .refine((datos) => datos.contrasena === datos.confirmar, {
+    path: ["confirmar"],
+    message: "Las contraseñas no coinciden.",
+  });
+
 export type DatosIngreso = z.infer<typeof ingresoSchema>;
 export type DatosRegistro = z.infer<typeof registroSchema>;
 

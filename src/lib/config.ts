@@ -7,10 +7,6 @@
 export const DESPACHO_GRATIS_DESDE: number | null = 49990;
 /** Plazo de entrega a domicilio. */
 export const PLAZO_DESPACHO = "24 a 48 horas";
-/** Costo de despacho en CLP bajo el mínimo gratis. Pendiente de definir con el negocio. */
-export const COSTO_DESPACHO: number | null = null;
-/** Comunas atendidas. Pendiente de definir con el negocio. */
-export const ZONAS_DESPACHO: string[] | null = null;
 
 /**
  * Dirección de la API de productos de Sedyjo, sin barra final (solo se usa en el servidor).

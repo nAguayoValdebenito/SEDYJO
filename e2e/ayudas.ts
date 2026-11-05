@@ -51,17 +51,33 @@ export async function completarDatosDeEntrega(
   if (direccionNueva) {
     await page.locator("#checkout-calle").fill("Los Aromos");
     await page.locator("#checkout-numero").fill("1234");
-    await page.locator("#checkout-comuna").fill("San Pedro de la Paz");
-    await page.locator("#checkout-region").fill("Biobío");
+    await page.locator("#checkout-comuna").selectOption("San Pedro de la Paz");
   }
+  // El total lo calcula la API: se espera a que el resumen muestre el despacho de la comuna.
+  await expect(page.getByRole("complementary", { name: "Resumen del pedido" })).toContainText(
+    /Despacho\s*(\$[\d.]+|Gratis)/,
+  );
   await page.getByRole("button", { name: "Continuar al pago" }).click();
   await expect(page.getByRole("heading", { name: "Revisa y paga" })).toBeVisible();
 }
 
-/** Del paso 2 a la pasarela simulada. */
-export async function irALaPasarela(page: Page) {
+/** Del paso 2: "Pagar" crea el pedido y confirma el pago; termina en la página de éxito o de error. */
+export async function pagar(page: Page) {
   await page.getByRole("main").getByRole("button", { name: "Pagar", exact: true }).click();
-  await page.waitForURL("**/checkout/pago-simulado");
+}
+
+/** Crea una cuenta nueva por el formulario real y deja la sesión iniciada. Devuelve su correo. */
+export async function registrarCliente(page: Page, nombre = "Cliente Nuevo") {
+  const correo = `cliente-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}@prueba.cl`;
+  await page.goto("/registro");
+  await page.waitForLoadState("networkidle");
+  await page.getByLabel("Nombre").fill(nombre);
+  await page.getByLabel("Correo").fill(correo);
+  await page.locator("#registro-contrasena").fill("Clave1234");
+  await page.locator("#registro-confirmar").fill("Clave1234");
+  await page.getByRole("button", { name: "Crear mi cuenta" }).click();
+  await page.waitForURL("**/cuenta");
+  return correo;
 }
 
 /** Cantidad de unidades que indica el carrito del encabezado ("$0" cuando está vacío). */

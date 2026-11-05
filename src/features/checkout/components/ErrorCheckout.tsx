@@ -10,10 +10,12 @@ import { EsqueletoCheckout } from "./EsqueletoCheckout";
 import { IndicadorCheckout } from "./IndicadorCheckout";
 
 const MENSAJES = {
-  rechazado: "El pago de demostración fue rechazado. Puedes intentarlo otra vez.",
-  cancelado: "Cancelaste el pago de demostración. Tu carrito sigue guardado.",
+  rechazado: "El pago fue rechazado. Puedes intentarlo otra vez.",
+  cancelado: "Cancelaste el pago. Tu carrito sigue guardado.",
   "tiempo-agotado": "La sesión de pago terminó. Inicia un nuevo intento.",
   invalido: "No pudimos validar el pago. Revisa tus datos e intenta de nuevo.",
+  "no-disponible":
+    "Los pagos todavía no están habilitados en la tienda. Tu carrito sigue guardado: vuelve a intentarlo más tarde.",
 };
 
 export function ErrorCheckout() {
@@ -31,7 +33,10 @@ export function ErrorCheckout() {
         <p role="alert" className="mt-2 text-gris-medio">
           {motivo ? MENSAJES[motivo] : "No hay un pago reciente para revisar."}
         </p>
-        <p className="mt-3 text-sm">Tu carrito no se ha vaciado ni se ha realizado ningún cobro.</p>
+        <p className="mt-3 text-sm">
+          Tu carrito no se ha vaciado y no se realizó ningún cobro. Si el pago quedó pendiente, tus
+          productos se liberan solos a los 30 minutos.
+        </p>
         <div className="mt-6 flex flex-wrap gap-3">
           <button
             type="button"
