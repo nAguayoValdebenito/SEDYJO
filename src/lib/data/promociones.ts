@@ -8,7 +8,7 @@ import { obtenerBanners } from "./catalogo-api";
  */
 export async function getCampanaModal(): Promise<CampanaModal | null> {
   "use cache";
-  cacheLife("minutes");
+  cacheLife("catalogo");
 
   return (await obtenerBanners()).campanaModal;
 }
