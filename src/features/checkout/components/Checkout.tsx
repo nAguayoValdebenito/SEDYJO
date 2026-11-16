@@ -17,6 +17,7 @@ import { MAX_DIRECCIONES, direccionPrincipal, mismaDireccion } from "@/lib/utils
 import { formatoPrecio } from "@/lib/utils/format";
 import { checkoutSchema, erroresCheckoutPorCampo } from "@/lib/validation/checkout";
 import type { Cotizacion, DatosCheckout, Despacho } from "@/types";
+import { enviarATransbank } from "@/lib/utils/webpay";
 import { cotizarCompra, iniciarPago, pagarPedido } from "../acciones";
 import { useCheckout } from "../store";
 import { EsqueletoCheckout } from "./EsqueletoCheckout";
@@ -50,6 +51,7 @@ export function Checkout({ despacho }: Props) {
   const [errorGeneral, setErrorGeneral] = useState("");
   const [enviando, setEnviando] = useState(false);
   const clavePago = useRef<{ firma: string; uuid: string } | null>(null);
+  const redirigiendo = useRef(false);
   const zonas = despacho?.zonas ?? [];
   const comunasAtendidas = zonas.map((z) => z.comuna);
   const direcciones = useDirecciones(usuario?.id ?? null);
@@ -277,6 +279,12 @@ export function Checkout({ despacho }: Props) {
       }
       clavePago.current = null;
       const pago = await pagarPedido(resultado.pedido.id);
+      if ("redirigir" in pago) {
+        // Webpay: el cliente paga en el formulario de Transbank y vuelve a /checkout/retorno.
+        redirigiendo.current = true;
+        enviarATransbank(pago.url, pago.token);
+        return;
+      }
       if (pago.ok) {
         guardarPedido(pago.pedido);
         router.replace("/checkout/exito");
@@ -288,7 +296,8 @@ export function Checkout({ despacho }: Props) {
       setErrorGeneral("No pudimos iniciar el pago. Intenta de nuevo.");
       enfocarError();
     } finally {
-      setEnviando(false);
+      // Yendo a Transbank el botón queda bloqueado hasta que el navegador cambie de página.
+      if (!redirigiendo.current) setEnviando(false);
     }
   };
 

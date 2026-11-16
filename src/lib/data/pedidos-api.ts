@@ -14,6 +14,7 @@ import {
   pedidoApiSchema,
 } from "./adaptador-pedidos";
 import { z } from "zod";
+import { esUrlWebpay } from "@/lib/utils/webpay";
 
 /**
  * Llamadas de cotización, pedidos, pago y seguimiento a la API de Sedyjo (solo servidor).
@@ -85,6 +86,28 @@ export async function obtenerPedidoApi(
   } catch {
     return respuestaInesperada();
   }
+}
+
+/**
+ * `POST /orders/:id/webpay/start`: inicia el pago con Webpay y devuelve a dónde enviar al
+ * cliente (`url` de Transbank + `token` para el campo `token_ws`). Responde 404 si la API
+ * todavía no tiene Webpay activo.
+ */
+export async function iniciarWebpayApi(
+  id: string,
+  credenciales: Credenciales,
+): Promise<ResultadoApi<{ url: string; token: string }>> {
+  const resultado = await llamar(`/orders/${encodeURIComponent(id)}/webpay/start`, {
+    metodo: "POST",
+    cuerpo: {},
+    cabeceras: cabecerasDeAcceso(credenciales),
+  });
+  if (!resultado.ok) return resultado;
+  const cuerpo = z
+    .object({ data: z.object({ url: z.string().refine(esUrlWebpay), token: z.string().min(1) }) })
+    .safeParse(resultado.cuerpo);
+  if (!cuerpo.success) return respuestaInesperada();
+  return { ok: true, data: cuerpo.data.data };
 }
 
 /** `POST /orders/:id/simulate-payment`: solo existe mientras los pagos simulados estén activos. */

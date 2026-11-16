@@ -180,7 +180,26 @@ export type DireccionPedido = {
 /** Estado del pago de un pedido. */
 export type EstadoPago = "pendiente" | "pagado" | "rechazado" | "expirado";
 
-export type PagoPedido = { estado: EstadoPago; fecha: string | null };
+/** Comprobante del cobro con Webpay: lo que el cliente debe poder revisar. */
+export type DetallePago = {
+  autorizacion: string;
+  /** Últimos 4 dígitos de la tarjeta. */
+  tarjeta: string;
+  /** "Crédito", "Débito" o "Prepago". */
+  tipoPago: string;
+  cuotas: number;
+  /** "Sin cuotas", "6 cuotas", "3 cuotas sin interés". */
+  cuotasTexto: string;
+  /** Fecha y hora del cobro (ISO 8601). */
+  fecha: string | null;
+};
+
+export type PagoPedido = {
+  estado: EstadoPago;
+  fecha: string | null;
+  /** Solo en pedidos pagados con Webpay, vistos por su dueño. */
+  detalle?: DetallePago;
+};
 
 /** Producto tal como se compró: precio y datos congelados al momento de la compra. */
 export type ItemPedido = {

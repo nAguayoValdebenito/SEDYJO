@@ -147,6 +147,24 @@ describe("pedido", () => {
     expect(pedido.items[0].fondo).toBe("#F6E3A1");
   });
 
+  it("lee el comprobante de pago de Webpay y lo omite cuando la API no lo trae", () => {
+    const detalle = {
+      autorizacion: "1213",
+      tarjeta: "6623",
+      tipoPago: "Crédito",
+      cuotas: 0,
+      cuotasTexto: "Sin cuotas",
+      fecha: "2026-11-16T12:00:00.000Z",
+    };
+    const con = leerRespuestaPedido({
+      data: { ...pedidoApi, pago: { estado: "pagado", fecha: "2026-11-16T12:00:01.000Z", detalle } },
+    }).pedido;
+    expect(con.pago?.detalle).toEqual(detalle);
+
+    const sin = leerRespuestaPedido({ data: pedidoApi }).pedido;
+    expect(sin.pago).not.toHaveProperty("detalle");
+  });
+
   it("también acepta el token junto a data", () => {
     const { accessToken } = leerRespuestaPedido({ data: pedidoApi, accessToken: "tok-456" });
     expect(accessToken).toBe("tok-456");
