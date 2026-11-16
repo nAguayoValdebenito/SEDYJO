@@ -6,6 +6,7 @@ import { BarraSuperior } from "@/components/layout/BarraSuperior";
 import { Encabezado } from "@/components/layout/Encabezado";
 import { FondoAnimado } from "@/components/layout/FondoAnimado";
 import { PiePagina } from "@/components/layout/PiePagina";
+import { SoloTienda } from "@/components/layout/SoloTienda";
 import { SincronizarSesion } from "@/features/auth/components/SincronizarSesion";
 import { PanelCarrito } from "@/features/carrito/components/PanelCarrito";
 import { SeccionModalPromocion } from "@/features/promociones/components/SeccionModalPromocion";
@@ -64,24 +65,28 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         >
           Saltar al contenido
         </a>
-        <FondoAnimado />
-        <BarraSuperior />
-        {/* La altura reservada coincide con la del encabezado real (móvil, tablet y escritorio). */}
-        <Suspense
-          fallback={<div className="h-[122px] sm:h-[72px] lg:h-[88px]" aria-hidden="true" />}
-        >
-          <Encabezado />
-        </Suspense>
-        <BarraEnvioGratis />
-        <SincronizarSesion />
+        <SoloTienda>
+          <FondoAnimado />
+          <BarraSuperior />
+          {/* La altura reservada coincide con la del encabezado real (móvil, tablet y escritorio). */}
+          <Suspense
+            fallback={<div className="h-[122px] sm:h-[72px] lg:h-[88px]" aria-hidden="true" />}
+          >
+            <Encabezado />
+          </Suspense>
+          <BarraEnvioGratis />
+          <SincronizarSesion />
+        </SoloTienda>
         <ViewTransition default="pagina">{children}</ViewTransition>
-        <PiePagina />
-        <Suspense fallback={null}>
-          <PanelCarrito />
-        </Suspense>
-        <Suspense fallback={null}>
-          <SeccionModalPromocion />
-        </Suspense>
+        <SoloTienda>
+          <PiePagina />
+          <Suspense fallback={null}>
+            <PanelCarrito />
+          </Suspense>
+          <Suspense fallback={null}>
+            <SeccionModalPromocion />
+          </Suspense>
+        </SoloTienda>
       </body>
     </html>
   );

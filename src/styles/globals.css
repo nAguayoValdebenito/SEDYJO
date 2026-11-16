@@ -497,3 +497,109 @@ dialog[data-visible="true"] .item-sale {
     opacity: 1 !important;
   }
 }
+
+/* ---------- Página "Muy pronto" (/proximamente) ---------- */
+
+.prox-camion {
+  animation: prox-camion 5.5s var(--ease-salida) infinite;
+}
+
+@keyframes prox-camion {
+  0% {
+    transform: translateX(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  80% {
+    transform: translateX(calc(min(100vw - 1.5rem, 28rem) - 6rem));
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(calc(min(100vw - 1.5rem, 28rem) - 6rem));
+    opacity: 0;
+  }
+}
+
+.prox-destello {
+  animation: prox-destello 2.4s ease-in-out infinite;
+}
+
+@keyframes prox-destello {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: scale(0.8) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15) rotate(20deg);
+  }
+}
+
+.prox-ping {
+  animation: prox-ping 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+@keyframes prox-ping {
+  75%,
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+
+.prox-mancha {
+  animation: prox-mancha 18s ease-in-out infinite;
+}
+
+@keyframes prox-mancha {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(40px, 30px) scale(1.12);
+  }
+}
+
+.prox-texto-brillo {
+  background-size: 200% auto;
+  animation: prox-texto-brillo 5s linear infinite;
+}
+
+@keyframes prox-texto-brillo {
+  to {
+    background-position: 200% center;
+  }
+}
+
+.prox-cinta {
+  animation: prox-cinta 32s linear infinite;
+}
+
+@keyframes prox-cinta {
+  to {
+    transform: translateX(-25%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .prox-camion,
+  .prox-destello,
+  .prox-ping,
+  .prox-mancha,
+  .prox-texto-brillo,
+  .prox-cinta {
+    animation: none;
+  }
+  .prox-camion {
+    transform: translateX(calc(min(100vw - 1.5rem, 28rem) - 6rem));
+  }
+}
+
+/* "Muy pronto" va sola: el marco de la tienda (menú, carrito, pie) no se ve ni un instante. */
+body:has([data-modo-proximamente]) [data-marco-tienda] {
+  display: none !important;
+}
