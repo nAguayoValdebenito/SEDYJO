@@ -2,6 +2,7 @@ import Link from "next/link";
 import { FotoOMarcador } from "@/components/ui/FotoOMarcador";
 import { formatoPrecio } from "@/lib/utils/format";
 import type { Pedido } from "@/types";
+import { ComprobantePago } from "./ComprobantePago";
 
 /** Productos del pedido (con el precio al que se compraron) y el desglose del total. */
 export function ResumenPedido({ pedido }: { pedido: Pedido }) {
@@ -60,6 +61,8 @@ export function ResumenPedido({ pedido }: { pedido: Pedido }) {
           <dd>{pedido.metodoPago}</dd>
         </div>
       </dl>
+
+      <ComprobantePago pedido={pedido} />
     </div>
   );
 }
