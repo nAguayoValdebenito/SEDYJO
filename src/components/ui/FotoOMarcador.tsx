@@ -14,6 +14,8 @@ type Props = {
   tema?: "claro" | "oscuro";
   /** Para fotos del primer pantallazo: se cargan de inmediato. */
   prioridad?: boolean;
+  /** `cover` rellena el contenedor (recorta); `contain` muestra la foto completa. */
+  ajuste?: "cover" | "contain";
 };
 
 /**
@@ -29,6 +31,7 @@ export function FotoOMarcador({
   sizes,
   tema = "claro",
   prioridad = false,
+  ajuste = "cover",
 }: Props) {
   const [cargada, setCargada] = useState(false);
 
@@ -48,7 +51,10 @@ export function FotoOMarcador({
         priority={prioridad}
         onLoad={() => setCargada(true)}
         data-cargada={cargada}
-        className="object-cover opacity-0 transition-opacity duration-300 ease-out data-[cargada=true]:opacity-100"
+        className={
+          (ajuste === "contain" ? "object-contain" : "object-cover") +
+          " opacity-0 transition-opacity duration-300 ease-out data-[cargada=true]:opacity-100"
+        }
       />
     );
   }

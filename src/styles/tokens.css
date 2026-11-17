@@ -14,6 +14,10 @@
   --color-verde-menta: #7fd1a8;
   --color-verde-palido: #cfe8db;
 
+  /* Fondos claros opcionales del carrusel principal (los elige el administrador) */
+  --color-crema: #fff3d6;
+  --color-celeste: #e3f1fb;
+
   /* Azul del logo */
   --color-azul: #1e4b8f;
   --color-azul-oscuro: #16386d;
