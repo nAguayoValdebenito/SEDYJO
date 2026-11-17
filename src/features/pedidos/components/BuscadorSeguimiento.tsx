@@ -117,7 +117,7 @@ export function BuscadorSeguimiento() {
           </p>
         )}
         {resultado?.tipo === "pedido" && (
-          <VistaPedido pedido={resultado.pedido} recomprar={false} />
+          <VistaPedido pedido={resultado.pedido} recomprar={false} correo={correo.trim()} />
         )}
       </div>
     </div>
