@@ -6,6 +6,7 @@ import type {
   CampanaModal,
   Categoria,
   Coleccion,
+  DisenoBanner,
   OfertaDelDia,
   OfertaDestacada,
   Producto,
@@ -57,6 +58,13 @@ export const bannerApiSchema = z.object({
   theme: z.string().nullable().optional(),
   ctaLabel: z.string().nullable().optional(),
   position: z.number().optional(),
+  // Diseño editable (la API puede no enviarlos: queda el diseño por defecto)
+  titleSize: z.string().nullable().optional(),
+  imageFit: z.string().nullable().optional(),
+  imageSize: z.string().nullable().optional(),
+  imageSide: z.string().nullable().optional(),
+  bgColor: z.string().nullable().optional(),
+  textColor: z.string().nullable().optional(),
 });
 
 export const imagenesSitioApiSchema = z.record(
@@ -246,6 +254,21 @@ function conBoton(b: BannerApi): { texto: string; href: string } | null {
   return href && texto ? { texto, href } : null;
 }
 
+const elegir = <T extends string>(valor: string | null | undefined, validos: readonly T[]): T | null =>
+  (validos as readonly string[]).includes(valor ?? "") ? (valor as T) : null;
+
+/** Lee el diseño editable de un banner; todo valor desconocido queda en «por defecto» (`null`). */
+export function disenoDeApi(b: BannerApi): DisenoBanner {
+  return {
+    tamanoTitulo: elegir(b.titleSize, ["sm", "md", "lg"] as const),
+    ajusteImagen: elegir(b.imageFit, ["cover", "contain"] as const),
+    tamanoImagen: elegir(b.imageSize, ["sm", "md", "lg"] as const),
+    ladoImagen: elegir(b.imageSide, ["left", "right"] as const),
+    colorFondo: b.bgColor?.trim() || null,
+    colorTexto: b.textColor?.trim() || null,
+  };
+}
+
 export function adaptarBannersPrincipales(banners: BannerApi[]): Banner[] {
   return banners
     .filter((b) => b.placement === "hero")
@@ -258,6 +281,7 @@ export function adaptarBannersPrincipales(banners: BannerApi[]): Banner[] {
       boton: conBoton(b),
       imagen: b.image ?? null,
       alt: b.alt ?? b.title,
+      diseno: disenoDeApi(b),
     }));
 }
 
@@ -274,6 +298,7 @@ export function adaptarBannersOscuros(banners: BannerApi[]): BannerOscuro[] {
       colorTitular: b.theme === "morado" ? "morado" : "dorado",
       href: rutaDesdeApi(b.linkUrl),
       cta: b.ctaLabel?.trim() || null,
+      diseno: disenoDeApi(b),
     }));
 }
 
@@ -291,6 +316,7 @@ export function adaptarCampanaModal(banners: BannerApi[]): CampanaModal | null {
       titulo: b.title,
       texto: b.subtitle ?? "",
       boton: conBoton(b),
+      diseno: disenoDeApi(b),
     }));
   if (slides.length === 0) return null;
 

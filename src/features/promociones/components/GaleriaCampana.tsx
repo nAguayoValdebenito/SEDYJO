@@ -8,6 +8,13 @@ import { FotoOMarcador } from "@/components/ui/FotoOMarcador";
 import { Insignia } from "@/components/ui/Insignia";
 import { cn } from "@/lib/utils/cn";
 import type { SlideCampana } from "@/types";
+import {
+  CLASE_TITULO,
+  DISENO_VACIO,
+  claseColorTexto,
+  claseFondo,
+  tamanoDelTitulo,
+} from "@/features/banners/diseno";
 
 type Props = {
   slides: SlideCampana[];
@@ -24,20 +31,31 @@ function ContenidoSlide({
   slide: SlideCampana;
   alElegirEnlace: () => void;
 }) {
+  const d = slide.diseno ?? DISENO_VACIO;
+  const tamTitulo = tamanoDelTitulo(slide.titulo, d.tamanoTitulo, "modal");
+  // Fondo elegido por el administrador (sin elegir: el negro de siempre y la imagen sobre carbón).
+  const fondo = d.colorFondo ? claseFondo("modal", d.colorFondo) : "bg-negro";
   return (
-    <>
-      <div className="relative aspect-[16/10] overflow-hidden bg-carbon">
+    <div className={fondo}>
+      <div className={cn("relative aspect-[16/10] overflow-hidden", d.colorFondo ? fondo : "bg-carbon")}>
         <FotoOMarcador
           src={slide.imagen}
           alt={slide.titulo}
           marcador="[imagen de la oferta]"
           tema="oscuro"
           sizes="(min-width: 640px) 520px, 92vw"
+          ajuste={d.ajusteImagen ?? "cover"}
         />
       </div>
       <div className="relative px-5 pb-2 pt-5 sm:px-7">
         <Insignia variante="morada">oferta especial</Insignia>
-        <h2 className="mt-2.5 font-titulos text-[26px] font-extrabold leading-[1.05] text-oro sm:text-[32px]">
+        <h2
+          className={cn(
+            "mt-2.5 font-titulos font-extrabold leading-[1.05]",
+            CLASE_TITULO.modal[tamTitulo],
+            claseColorTexto(d.colorTexto) ?? "text-oro",
+          )}
+        >
           {slide.titulo}
         </h2>
         <p className="mt-2 text-sm leading-relaxed text-white/85 sm:text-[15px]">{slide.texto}</p>
@@ -51,7 +69,7 @@ function ContenidoSlide({
           </Link>
         )}
       </div>
-    </>
+    </div>
   );
 }
 
