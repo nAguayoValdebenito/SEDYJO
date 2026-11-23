@@ -64,6 +64,23 @@ export type OfertaDestacada = {
 
 export type Coleccion = "semana" | "exclusivo-online";
 
+export type TamanoBanner = "sm" | "md" | "lg";
+
+/**
+ * Diseño que el administrador puede ajustar en cada banner. Todo es opcional: `null` es el diseño
+ * de siempre de la zona. Las claves de color que no corresponden a la zona se ignoran.
+ */
+export type DisenoBanner = {
+  /** `null` = automático según el largo del título. */
+  tamanoTitulo: TamanoBanner | null;
+  /** Llenar el recuadro (recorta) o mostrar la imagen completa. */
+  ajusteImagen: "cover" | "contain" | null;
+  tamanoImagen: TamanoBanner | null;
+  ladoImagen: "left" | "right" | null;
+  colorFondo: string | null;
+  colorTexto: string | null;
+};
+
 export type Banner = {
   id: string;
   /** Texto pequeño sobre el título; vacío si no hay. */
@@ -74,6 +91,7 @@ export type Banner = {
   boton: { texto: string; href: string } | null;
   imagen: string | null;
   alt: string;
+  diseno?: DisenoBanner;
 };
 
 /** Banner secundario de fondo negro con dorado y morado neón. */
@@ -88,6 +106,7 @@ export type BannerOscuro = {
   href: string | null;
   /** Texto del enlace (ej. "Comprar"). */
   cta: string | null;
+  diseno?: DisenoBanner;
 };
 
 export type ItemCarrito = {
@@ -114,6 +133,7 @@ export type SlideCampana = {
   titulo: string;
   texto: string;
   boton: { texto: string; href: string } | null;
+  diseno?: DisenoBanner;
 };
 
 /**

@@ -8,6 +8,17 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { claseBoton, interaccionVivaBase } from "@/components/ui/boton";
 import { cn } from "@/lib/utils/cn";
 import type { Banner } from "@/types";
+import {
+  CLASE_TITULO,
+  DISENO_VACIO,
+  PRINCIPAL_COLUMNAS,
+  PRINCIPAL_MAX_IMAGEN,
+  PRINCIPAL_MOVIL_IMAGEN,
+  PRINCIPAL_MOVIL_MAX_TITULO,
+  PRINCIPAL_MOVIL_RESERVA_IZQUIERDA,
+  claseFondo,
+  tamanoDelTitulo,
+} from "../diseno";
 
 type Props = {
   banners: Banner[];
@@ -41,6 +52,12 @@ export function BannerPrincipal({ banners }: Props) {
 
   const banner = banners[indice];
   if (!banner) return null;
+
+  // Diseño editable del banner que se muestra (todo es opcional: sin elegir, queda el de siempre).
+  const diseno = banner.diseno ?? DISENO_VACIO;
+  const izquierda = diseno.ladoImagen === "left";
+  const tamImagen = diseno.tamanoImagen ?? "md";
+  const tamTitulo = tamanoDelTitulo(banner.titulo, diseno.tamanoTitulo, "principal");
 
   const irA = (nuevo: number) => {
     setIndice((nuevo + total) % total);
@@ -82,18 +99,34 @@ export function BannerPrincipal({ banners }: Props) {
             exit={{ opacity: 0, x: -24 }}
             transition={{ duration: 0.28 }}
             aria-live={pausado ? "polite" : "off"}
-            className="relative flex min-h-[inherit] flex-col justify-center px-5 pb-[46px] pt-6 md:grid md:grid-cols-[minmax(0,1fr)_42%] md:items-center md:gap-6 md:px-11 md:pb-[72px] md:pt-10"
+            className={cn(
+              "relative flex min-h-[inherit] flex-col justify-center px-5 pb-[46px] pt-6 md:grid md:items-center md:gap-6 md:px-11 md:pb-[72px] md:pt-10",
+              PRINCIPAL_COLUMNAS[izquierda ? "left" : "right"][tamImagen],
+              claseFondo("principal", diseno.colorFondo),
+              diseno.colorFondo === "blanco" && "border border-borde",
+            )}
           >
             {/*
               Columna de texto: nunca invade la imagen (min-w-0 + palabras que se parten si hace falta).
             */}
-            <div className="relative flex min-w-0 flex-col gap-2 md:gap-3.5">
+            <div
+              className={cn(
+                "relative flex min-w-0 flex-col gap-2 md:gap-3.5",
+                izquierda && PRINCIPAL_MOVIL_RESERVA_IZQUIERDA[tamImagen],
+              )}
+            >
               {banner.etiqueta && (
                 <span className="relative text-xs font-bold uppercase tracking-[0.12em] text-verde-oscuro">
                   {banner.etiqueta}
                 </span>
               )}
-              <h2 className="relative max-w-[170px] break-words font-titulos text-[28px] font-extrabold leading-[1.02] md:max-w-none md:text-[34px] lg:text-[44px]">
+              <h2
+                className={cn(
+                  "relative break-words font-titulos font-extrabold leading-[1.02] md:max-w-none",
+                  PRINCIPAL_MOVIL_MAX_TITULO[tamImagen],
+                  CLASE_TITULO.principal[tamTitulo],
+                )}
+              >
                 {banner.titulo}
               </h2>
               <p className="relative hidden max-w-[340px] text-[15px] leading-normal text-gris-medio md:block">
@@ -117,7 +150,12 @@ export function BannerPrincipal({ banners }: Props) {
             <div
               aria-hidden={banner.imagen ? undefined : true}
               className={cn(
-                "absolute right-3.5 top-[18px] size-[110px] overflow-hidden rounded-lg md:relative md:right-auto md:top-auto md:aspect-square md:size-auto md:w-full md:max-w-[300px] md:justify-self-end md:rounded-[10px]",
+                "absolute top-[18px] overflow-hidden rounded-lg md:relative md:top-auto md:aspect-square md:size-auto md:w-full md:rounded-[10px]",
+                PRINCIPAL_MOVIL_IMAGEN[tamImagen],
+                PRINCIPAL_MAX_IMAGEN[tamImagen],
+                izquierda
+                  ? "left-3.5 md:left-auto md:order-first md:justify-self-start"
+                  : "right-3.5 md:right-auto md:justify-self-end",
                 !banner.imagen &&
                   "flex items-center justify-center border-2 border-dashed border-verde p-1.5 text-center text-[11px] text-verde-oscuro md:p-3 md:text-[13px]",
               )}
@@ -129,7 +167,7 @@ export function BannerPrincipal({ banners }: Props) {
                   fill
                   priority={indice === 0}
                   sizes="(min-width: 768px) 300px, 110px"
-                  className="object-cover"
+                  className={diseno.ajusteImagen === "contain" ? "object-contain" : "object-cover"}
                 />
               ) : (
                 "[imagen del banner principal]"
