@@ -2,9 +2,11 @@ import Link from "next/link";
 import { FotoOMarcador } from "@/components/ui/FotoOMarcador";
 import { formatoPrecio } from "@/lib/utils/format";
 import type { Pedido } from "@/types";
+import { BotonBoleta } from "./BotonBoleta";
+import { ComprobantePago } from "./ComprobantePago";
 
 /** Productos del pedido (con el precio al que se compraron) y el desglose del total. */
-export function ResumenPedido({ pedido }: { pedido: Pedido }) {
+export function ResumenPedido({ pedido, correo }: { pedido: Pedido; correo?: string }) {
   return (
     <div className="flex flex-col gap-4">
       <ul className="divide-y divide-borde rounded-[10px] border border-borde bg-white">
@@ -60,6 +62,9 @@ export function ResumenPedido({ pedido }: { pedido: Pedido }) {
           <dd>{pedido.metodoPago}</dd>
         </div>
       </dl>
+
+      <ComprobantePago pedido={pedido} />
+      <BotonBoleta pedido={pedido} correo={correo} />
     </div>
   );
 }

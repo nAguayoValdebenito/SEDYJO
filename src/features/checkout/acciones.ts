@@ -6,6 +6,7 @@ import type { FalloApi } from "@/lib/data/cliente-api";
 import {
   cotizarApi,
   crearPedidoApi,
+  iniciarWebpayApi,
   obtenerPedidoApi,
   simularPagoApi,
 } from "@/lib/data/pedidos-api";
@@ -159,18 +160,28 @@ export async function iniciarPago(
   return { ok: true, pedido };
 }
 
+/** El pago sigue en Transbank: el navegador debe ir a `url` y enviar `token` como `token_ws`. */
+export type ResultadoInicioWebpay = { redirigir: true; url: string; token: string };
+
 /**
- * PUNTO ÚNICO DE PAGO. Hoy la API confirma el pago con su pasarela simulada
- * (`POST /orders/:id/simulate-payment`, solo mientras `SIMULATED_PAYMENTS=true`). Cuando se
- * integre Webpay, solo se reemplaza el interior de esta función por la redirección a Transbank:
- * el pedido se marcará como pagado desde el servidor y el resto del flujo (consultar el pedido,
- * mostrar el éxito o el error) no cambia.
+ * PUNTO ÚNICO DE PAGO. Si la API tiene Webpay activo, devuelve a dónde enviar al cliente
+ * (formulario de Transbank): el cobro se confirma en la API cuando Transbank lo devuelve, y la
+ * tienda lo muestra en `/checkout/retorno` (ver `confirmarPagoPedido`). Si la API todavía no
+ * tiene Webpay, usa su pasarela simulada (`POST /orders/:id/simulate-payment`, solo mientras
+ * `SIMULATED_PAYMENTS=true`).
  */
-export async function pagarPedido(pedidoId: string): Promise<ResultadoPago> {
+export async function pagarPedido(pedidoId: string): Promise<ResultadoPago | ResultadoInicioWebpay> {
   const id = idSchema.safeParse(pedidoId);
   if (!id.success) return { ok: false, motivo: "invalido" };
 
   const acceso = await credenciales(id.data);
+
+  const webpay = await iniciarWebpayApi(id.data, acceso);
+  if (webpay.ok) return { redirigir: true, ...webpay.data };
+  if (webpay.status === 409) return { ok: false, motivo: "tiempo-agotado" };
+  if (webpay.status !== 404) return { ok: false, motivo: "invalido" };
+  // 404: la API no tiene Webpay activo (o el pedido no es del cliente): se prueba la simulada.
+
   const simulacion = await simularPagoApi(id.data, "pagado", acceso);
   if (!simulacion.ok) {
     return { ok: false, motivo: simulacion.status === 404 ? "no-disponible" : "invalido" };
@@ -183,4 +194,23 @@ export async function pagarPedido(pedidoId: string): Promise<ResultadoPago> {
   const pedido = consulta.data;
   if (pedido.pago?.estado === "pagado") return { ok: true, pedido };
   return { ok: false, motivo: pedido.pago?.estado === "expirado" ? "tiempo-agotado" : "rechazado" };
+}
+
+/**
+ * Al volver de Transbank (`/checkout/retorno`): el estado real del pago lo decide la API, que ya
+ * confirmó el cobro con Transbank. Nunca se confía en lo que traiga la dirección de la página.
+ */
+export async function confirmarPagoPedido(pedidoId: string): Promise<ResultadoPago> {
+  const id = idSchema.safeParse(pedidoId);
+  if (!id.success) return { ok: false, motivo: "invalido" };
+
+  const consulta = await obtenerPedidoApi(id.data, await credenciales(id.data));
+  if (!consulta.ok) return { ok: false, motivo: "invalido" };
+
+  const pedido = consulta.data;
+  const estado = pedido.pago?.estado;
+  if (estado === "pagado") return { ok: true, pedido };
+  if (estado === "expirado") return { ok: false, motivo: "tiempo-agotado" };
+  if (estado === "rechazado") return { ok: false, motivo: "rechazado" };
+  return { ok: false, motivo: "invalido" }; // pendiente: la API aún no registró el resultado
 }

@@ -99,10 +99,22 @@ const pedidoApiBaseSchema = z.object({
   despacho: z.number().nullable(),
   total: z.number().nullable(),
   metodoPago: z.string(),
+  boleta: z.object({ folio: z.number() }).nullable().optional(),
   pago: z
     .object({
       estado: z.enum(["pendiente", "pagado", "rechazado", "expirado"]),
       fecha: z.string().nullable().optional(),
+      detalle: z
+        .object({
+          autorizacion: z.string(),
+          tarjeta: z.string(),
+          tipoPago: z.string(),
+          cuotas: z.number(),
+          cuotasTexto: z.string(),
+          fecha: z.string().nullable().optional(),
+        })
+        .nullable()
+        .optional(),
     })
     .nullable()
     .optional(),
@@ -204,7 +216,16 @@ export function adaptarPedido(api: PedidoApi): Pedido {
     despacho: api.despacho,
     total: api.total,
     metodoPago: NOMBRES_PAGO[api.metodoPago] ?? api.metodoPago,
-    pago: api.pago ? { estado: api.pago.estado, fecha: api.pago.fecha ?? null } : null,
+    pago: api.pago
+      ? {
+          estado: api.pago.estado,
+          fecha: api.pago.fecha ?? null,
+          ...(api.pago.detalle
+            ? { detalle: { ...api.pago.detalle, fecha: api.pago.detalle.fecha ?? null } }
+            : {}),
+        }
+      : null,
+    boleta: api.boleta ? { folio: api.boleta.folio } : null,
     eventos: api.eventos,
   };
 }

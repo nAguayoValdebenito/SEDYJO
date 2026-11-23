@@ -14,6 +14,8 @@ import {
   pedidoApiSchema,
 } from "./adaptador-pedidos";
 import { z } from "zod";
+import { URL_API } from "@/lib/config";
+import { esUrlWebpay } from "@/lib/utils/webpay";
 
 /**
  * Llamadas de cotización, pedidos, pago y seguimiento a la API de Sedyjo (solo servidor).
@@ -87,6 +89,28 @@ export async function obtenerPedidoApi(
   }
 }
 
+/**
+ * `POST /orders/:id/webpay/start`: inicia el pago con Webpay y devuelve a dónde enviar al
+ * cliente (`url` de Transbank + `token` para el campo `token_ws`). Responde 404 si la API
+ * todavía no tiene Webpay activo.
+ */
+export async function iniciarWebpayApi(
+  id: string,
+  credenciales: Credenciales,
+): Promise<ResultadoApi<{ url: string; token: string }>> {
+  const resultado = await llamar(`/orders/${encodeURIComponent(id)}/webpay/start`, {
+    metodo: "POST",
+    cuerpo: {},
+    cabeceras: cabecerasDeAcceso(credenciales),
+  });
+  if (!resultado.ok) return resultado;
+  const cuerpo = z
+    .object({ data: z.object({ url: z.string().refine(esUrlWebpay), token: z.string().min(1) }) })
+    .safeParse(resultado.cuerpo);
+  if (!cuerpo.success) return respuestaInesperada();
+  return { ok: true, data: cuerpo.data.data };
+}
+
 /** `POST /orders/:id/simulate-payment`: solo existe mientras los pagos simulados estén activos. */
 export async function simularPagoApi(
   id: string,
@@ -99,6 +123,53 @@ export async function simularPagoApi(
     cabeceras: cabecerasDeAcceso(credenciales),
   });
   return resultado.ok ? { ok: true, data: null } : resultado;
+}
+
+export type BoletaPdf = { pdf: ArrayBuffer; nombre: string };
+
+async function pedirBoleta(
+  ruta: string,
+  init: { metodo: "GET" | "POST"; cuerpo?: unknown; cabeceras?: Record<string, string> },
+): Promise<ResultadoApi<BoletaPdf>> {
+  try {
+    const respuesta = await fetch(`${URL_API}/api/v1${ruta}`, {
+      method: init.metodo,
+      headers: {
+        Accept: "application/pdf",
+        ...(init.cuerpo !== undefined ? { "Content-Type": "application/json" } : {}),
+        ...init.cabeceras,
+      },
+      body: init.cuerpo !== undefined ? JSON.stringify(init.cuerpo) : undefined,
+      cache: "no-store",
+      signal: AbortSignal.timeout(20_000),
+    });
+    if (!respuesta.ok) {
+      const error = (await respuesta.json().catch(() => ({}))) as { error?: string; code?: string };
+      return {
+        ok: false,
+        status: respuesta.status,
+        code: error.code ?? null,
+        mensaje: error.error ?? "No pudimos obtener la boleta.",
+      };
+    }
+    const nombre = /filename="([^"]+)"/.exec(respuesta.headers.get("content-disposition") ?? "")?.[1];
+    return { ok: true, data: { pdf: await respuesta.arrayBuffer(), nombre: nombre ?? "boleta.pdf" } };
+  } catch {
+    return { ok: false, status: 0, code: "sin_conexion", mensaje: "No pudimos conectar con el servidor." };
+  }
+}
+
+/** `GET /orders/:id/boleta`: PDF de la boleta, con la sesión del dueño o el token del pedido. */
+export function boletaPedidoApi(id: string, credenciales: Credenciales) {
+  return pedirBoleta(`/orders/${encodeURIComponent(id)}/boleta`, {
+    metodo: "GET",
+    cabeceras: cabecerasDeAcceso(credenciales),
+  });
+}
+
+/** `POST /orders/boleta`: PDF de la boleta desde el seguimiento público (número + correo). */
+export function boletaPublicaApi(numero: string, correo: string) {
+  return pedirBoleta("/orders/boleta", { metodo: "POST", cuerpo: { numero, correo } });
 }
 
 /** `POST /orders/track`: seguimiento público con número y correo. */
