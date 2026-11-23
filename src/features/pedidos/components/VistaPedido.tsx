@@ -7,7 +7,16 @@ import { LineaTiempoPedido } from "./LineaTiempoPedido";
 import { ResumenPedido } from "./ResumenPedido";
 
 /** Contenido completo de un pedido: estado y envío, dirección y resumen. Lo usan la cuenta y `/seguimiento`. */
-export function VistaPedido({ pedido, recomprar = true }: { pedido: Pedido; recomprar?: boolean }) {
+export function VistaPedido({
+  pedido,
+  recomprar = true,
+  correo,
+}: {
+  pedido: Pedido;
+  recomprar?: boolean;
+  /** Correo escrito en el seguimiento público (para pedir la boleta); en la cuenta no se usa. */
+  correo?: string;
+}) {
   return (
     <div className="contenido-entra flex flex-col gap-8">
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
@@ -36,7 +45,7 @@ export function VistaPedido({ pedido, recomprar = true }: { pedido: Pedido; reco
           <h3 id="titulo-resumen" className="font-titulos text-lg font-extrabold">
             Resumen
           </h3>
-          <ResumenPedido pedido={pedido} />
+          <ResumenPedido pedido={pedido} correo={correo} />
           {recomprar && pedido.estado !== "cancelado" && (
             <BotonVolverAComprar items={pedido.items} variante="primario" tamano="lg" />
           )}

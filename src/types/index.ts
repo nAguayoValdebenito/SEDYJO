@@ -245,6 +245,8 @@ export type Pedido = {
   metodoPago: string;
   /** Estado del pago según la API (los pedidos de ejemplo no lo traen). */
   pago?: PagoPedido | null;
+  /** Boleta electrónica ya emitida y descargable; `null` mientras no esté lista. */
+  boleta?: { folio: number } | null;
   eventos: EventoEnvio[];
 };
 
